@@ -90,6 +90,15 @@ export async function syncPushSettings(settings: AppSettings) {
   }
 }
 
+export async function syncDeleteProduct(id: string) {
+  try {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) throw error;
+  } catch (err) {
+    console.error('Failed to delete product from Supabase', err);
+  }
+}
+
 export async function syncPullAll(db: IDBDatabase) {
   try {
     const [productsRes, transactionsRes, customersRes, deniRes, settingsRes] = await Promise.all([

@@ -4,18 +4,19 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload } from 'lucide-react';
+import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload, Trash2 } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { Product } from '../types';
-import { saveProduct } from '../db/indexedDb';
+import { saveProduct, deleteProduct } from '../db/indexedDb';
 
 interface ProductFormModalProps {
   onClose: () => void;
   onSuccess: (updatedProduct: Product) => void;
+  onDelete?: (id: string) => void;
   productToEdit?: Product;
 }
 
-export default function ProductFormModal({ onClose, onSuccess, productToEdit }: ProductFormModalProps) {
+export default function ProductFormModal({ onClose, onSuccess, onDelete, productToEdit }: ProductFormModalProps) {
   const [name, setName] = useState<string>(productToEdit?.name || '');
   const [sku, setSku] = useState<string>(productToEdit?.sku || '');
   const [quantity, setQuantity] = useState<number>(productToEdit?.quantity ?? 10);
@@ -372,6 +373,22 @@ export default function ProductFormModal({ onClose, onSuccess, productToEdit }: 
 
           {/* Buttons */}
           <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 shrink-0 flex gap-2 font-bold">
+            {productToEdit && onDelete && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (window.confirm(`Delete "${productToEdit.name}" permanently? This cannot be undone.`)) {
+                    await deleteProduct(productToEdit.id);
+                    onDelete(productToEdit.id);
+                    onClose();
+                  }
+                }}
+                className="p-3 rounded-xl border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer active:scale-95"
+                title="Delete product"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
             <button
               type="button"
               onClick={onClose}

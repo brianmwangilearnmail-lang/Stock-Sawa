@@ -4,7 +4,7 @@
  */
 
 import { Product, InventoryTransaction, Customer, DeniTransaction, AppSettings } from '../types';
-import { syncPushProduct, syncPushTransaction, syncPushCustomer, syncPushDeniTransaction, syncPushSettings } from '../lib/syncEngine';
+import { syncPushProduct, syncPushTransaction, syncPushCustomer, syncPushDeniTransaction, syncPushSettings, syncDeleteProduct } from '../lib/syncEngine';
 
 const DB_NAME = 'stocksawa_db';
 const DB_VERSION = 3;
@@ -297,7 +297,10 @@ export async function deleteProduct(id: string): Promise<void> {
     const tx = db.transaction('products', 'readwrite');
     const store = tx.objectStore('products');
     const request = store.delete(id);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      syncDeleteProduct(id);
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }

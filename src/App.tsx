@@ -687,6 +687,10 @@ export default function App() {
             setProductToEdit(null);
             await refreshAllData();
           }}
+          onDelete={async (id) => {
+            setProductToEdit(null);
+            await refreshAllData();
+          }}
         />
       )}
 
