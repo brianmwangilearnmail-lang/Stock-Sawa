@@ -593,7 +593,7 @@ export default function App() {
             products={products}
             transactions={transactions}
             setActiveTab={setActiveTab}
-            username={username}
+            username={session?.user?.user_metadata?.username || session?.user?.email?.split('@')[0] || ''}
             showToast={(msg) => {
               setAppToast(msg);
               setTimeout(() => setAppToast(null), 3000);
