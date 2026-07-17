@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Search, UserPlus, Phone, CreditCard, ChevronRight, ArrowUpRight, 
-  ArrowDownLeft, CheckCircle, RefreshCw, X, HelpCircle, ShoppingBag, Plus
+  ArrowDownLeft, CheckCircle, RefreshCw, X, HelpCircle, ShoppingBag, Plus, AlertTriangle
 } from 'lucide-react';
 import { Customer, DeniTransaction, Product, InventoryTransaction } from '../types';
 import { 
@@ -38,6 +38,7 @@ export default function DeniLedgerView({
   const [repaymentAmount, setRepaymentAmount] = useState<string>('');
   const [repaymentNotes, setRepaymentNotes] = useState<string>('');
   const [isSavingRepay, setIsSavingRepay] = useState<boolean>(false);
+  const [showOverpayConfirm, setShowOverpayConfirm] = useState<boolean>(false);
 
   // New customer states
   const [showAddCustomer, setShowAddCustomer] = useState<boolean>(false);
@@ -289,47 +290,44 @@ export default function DeniLedgerView({
     }
 
     if (repayVal > selectedCust.debtBalance) {
-      const confirmOverpay = window.confirm(
-        `Repayment amount (KES ${repayVal}) exceeds the current debt (KES ${selectedCust.debtBalance}). Continue?`
-      );
-      if (!confirmOverpay) return;
+      // Show custom in-UI confirmation instead of window.confirm (which crashes PWA)
+      setShowOverpayConfirm(true);
+      return;
     }
 
+    await processRepayment(repayVal);
+  };
+
+  // Extracted repayment processor used by both normal + overpay confirm paths
+  const processRepayment = async (repayVal: number) => {
+    if (!selectedCust) return;
     setIsSavingRepay(true);
     try {
       const timestamp = new Date().toISOString();
       const transactionId = 'repay_' + Date.now();
-
-      // Create negative debt transaction (payment)
       const repayTx: DeniTransaction = {
         id: transactionId,
         customerId: selectedCust.id,
         productId: null,
-        amount: -repayVal, // Negative amount denotes payment
+        amount: -repayVal,
         type: 'payment',
         notes: repaymentNotes.trim() || 'Credit Repayment Clear',
         createdAt: timestamp,
         syncStatus: isOffline ? 'pending_sync' : 'synced'
       };
-
-      // Subtract debt balance
       const updatedCust: Customer = {
         ...selectedCust,
         debtBalance: Math.max(0, selectedCust.debtBalance - repayVal)
       };
-
       await saveDeniTransaction(repayTx);
       await saveCustomer(updatedCust);
-
-      // Refresh and reset
       setSelectedCust(updatedCust);
       onRefreshCustomers();
       await loadDeniTransactions();
-      
       setRepaymentAmount('');
       setRepaymentNotes('');
       setShowRepayModal(false);
-      
+      setShowOverpayConfirm(false);
       if (showToast) showToast('Debt paid successfully!');
     } catch (err) {
       console.error(err);
@@ -621,7 +619,6 @@ export default function DeniLedgerView({
                 id="repayment-amount-input"
                 className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-mono focus:ring-1 focus:ring-amber-500 focus:outline-none focus:bg-white dark:focus:bg-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                 placeholder="e.g. 500"
-                max={selectedCust.debtBalance}
                 min="1"
               />
             </div>
@@ -657,6 +654,45 @@ export default function DeniLedgerView({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* OVERPAY CONFIRMATION DIALOG */}
+      {showOverpayConfirm && selectedCust && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm p-6 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 animate-[scaleIn_0.2s_ease-out]">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-slate-800 dark:text-white">Overpayment Detected</h4>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Amount exceeds outstanding debt of <strong className="font-mono text-amber-700 dark:text-amber-400">KES {selectedCust.debtBalance}</strong>
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              The repayment amount is more than what the customer owes. Proceeding will clear their balance to <strong>KES 0</strong>. Do you want to continue?
+            </p>
+            <div className="flex gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowOverpayConfirm(false)}
+                className="flex-1 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl transition-colors cursor-pointer"
+              >
+                Go Back
+              </button>
+              <button
+                type="button"
+                onClick={() => processRepayment(Number(repaymentAmount))}
+                disabled={isSavingRepay}
+                className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer disabled:bg-slate-300 dark:disabled:bg-slate-700"
+              >
+                {isSavingRepay ? 'Saving...' : 'Yes, Confirm Payment'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
