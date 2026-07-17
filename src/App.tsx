@@ -18,6 +18,7 @@ import BottomDeductionModal from './components/BottomDeductionModal';
 import ProductFormModal from './components/ProductFormModal';
 import BarcodeScanner from './components/BarcodeScanner';
 import AuthPage from './components/AuthPage';
+import LandingPage from './components/LandingPage';
 import { syncPullAll } from './lib/syncEngine';
 import { supabase } from './lib/supabase';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -29,6 +30,7 @@ const DashboardView = lazy(() => import('./components/DashboardView'));
 const ProfileView = lazy(() => import('./components/ProfileView'));
 export default function App() {
   const [session, setSession] = useState<any>(null);
+  const [showAuth, setShowAuth] = useState<boolean>(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
   // Database state
@@ -214,7 +216,10 @@ export default function App() {
   }
 
   if (!session) {
-    return <AuthPage onSuccess={() => refreshAllData()} />;
+    if (!showAuth) {
+      return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+    }
+    return <AuthPage onSuccess={() => refreshAllData()} onBack={() => setShowAuth(false)} />;
   }
 
   return (

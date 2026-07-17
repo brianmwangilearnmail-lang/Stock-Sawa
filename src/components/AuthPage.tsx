@@ -4,9 +4,10 @@ import { supabase } from '../lib/supabase';
 
 interface AuthPageProps {
   onSuccess: () => void;
+  onBack?: () => void;
 }
 
-export default function AuthPage({ onSuccess }: AuthPageProps) {
+export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,8 +47,19 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans selection:bg-emerald-500/20 relative">
+      
+      {onBack && (
+        <button 
+          onClick={onBack}
+          className="absolute top-6 left-4 sm:left-8 flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          Back to Home
+        </button>
+      )}
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg mb-4">
             <Store className="w-8 h-8 text-white" />
