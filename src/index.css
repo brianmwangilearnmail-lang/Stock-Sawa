@@ -95,3 +95,9 @@
 .is-android ::-webkit-scrollbar-thumb:active {
   background-color: rgba(107, 114, 128, 0.7);
 }
+
+/* Make toasts float at mid eye level on Android devices */
+.is-android .android-toast {
+  top: 40% !important;
+  transform: translate(-50%, -50%) !important;
+}

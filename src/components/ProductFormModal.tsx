@@ -14,9 +14,10 @@ interface ProductFormModalProps {
   onSuccess: (updatedProduct: Product) => void;
   onDelete?: (id: string) => void;
   productToEdit?: Product;
+  showToast?: (msg: string) => void;
 }
 
-export default function ProductFormModal({ onClose, onSuccess, onDelete, productToEdit }: ProductFormModalProps) {
+export default function ProductFormModal({ onClose, onSuccess, onDelete, productToEdit, showToast }: ProductFormModalProps) {
   const [name, setName] = useState<string>(productToEdit?.name || '');
   const [sku, setSku] = useState<string>(productToEdit?.sku || '');
   const [quantity, setQuantity] = useState<number>(productToEdit?.quantity ?? 10);
@@ -52,6 +53,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
     if (!file) return;
 
     compressAndSetImage(file);
+    e.target.value = ''; // Reset input value so selecting same file again fires onChange
   };
 
   const compressAndSetImage = async (file: File) => {
@@ -66,6 +68,11 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
       const compressedFile = await imageCompression(file, options);
       const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
       setImageUrl(base64);
+      if (showToast) {
+        showToast('Image uploaded and compressed successfully!');
+      } else {
+        showToastMsg('Image uploaded and compressed successfully!', 'success');
+      }
     } catch (error) {
       console.error('Error compressing image, falling back to original:', error);
       // Fallback if compression fails (common on some mobile browsers)
@@ -73,6 +80,11 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
           setImageUrl(reader.result);
+          if (showToast) {
+            showToast('Original image uploaded successfully!');
+          } else {
+            showToastMsg('Original image uploaded successfully!', 'success');
+          }
         }
       };
       reader.readAsDataURL(file);

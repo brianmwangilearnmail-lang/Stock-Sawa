@@ -275,7 +275,7 @@ export default function App() {
 
       {/* Sync Status Overlay Toast */}
       {syncToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 z-50 animate-[slideDown_0.3s_ease-out]">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 z-50 animate-[slideDown_0.3s_ease-out] android-toast">
           <RefreshCw className="h-4 w-4 animate-spin" />
           <span>{syncToast}</span>
         </div>
@@ -283,7 +283,7 @@ export default function App() {
 
       {/* Global App Toast */}
       {appToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 z-50 animate-[slideDown_0.3s_ease-out]">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 z-50 animate-[slideDown_0.3s_ease-out] android-toast">
           <Check className="h-4 w-4" />
           <span>{appToast}</span>
         </div>
@@ -720,6 +720,10 @@ export default function App() {
           onClose={() => {
             setShowProductModal(false);
             setProductToEdit(null);
+          }}
+          showToast={(msg) => {
+            setAppToast(msg);
+            setTimeout(() => setAppToast(null), 3000);
           }}
           onSuccess={async (updatedProduct) => {
             setShowProductModal(false);
