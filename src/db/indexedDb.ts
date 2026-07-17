@@ -4,6 +4,7 @@
  */
 
 import { Product, InventoryTransaction, Customer, DeniTransaction, AppSettings } from '../types';
+import { syncPushProduct, syncPushTransaction, syncPushCustomer, syncPushDeniTransaction, syncPushSettings } from '../lib/syncEngine';
 
 const DB_NAME = 'stocksawa_db';
 const DB_VERSION = 3;
@@ -282,7 +283,10 @@ export async function saveProduct(product: Product): Promise<void> {
     const tx = db.transaction('products', 'readwrite');
     const store = tx.objectStore('products');
     const request = store.put(product);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      syncPushProduct(product);
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -322,7 +326,10 @@ export async function saveTransaction(transaction: InventoryTransaction): Promis
     const tx = db.transaction('transactions', 'readwrite');
     const store = tx.objectStore('transactions');
     const request = store.put(transaction);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      syncPushTransaction(transaction);
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -345,7 +352,10 @@ export async function saveCustomer(customer: Customer): Promise<void> {
     const tx = db.transaction('customers', 'readwrite');
     const store = tx.objectStore('customers');
     const request = store.put(customer);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      syncPushCustomer(customer);
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -373,7 +383,10 @@ export async function saveDeniTransaction(transaction: DeniTransaction): Promise
     const tx = db.transaction('deni_transactions', 'readwrite');
     const store = tx.objectStore('deni_transactions');
     const request = store.put(transaction);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      syncPushDeniTransaction(transaction);
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }
@@ -396,7 +409,10 @@ export async function saveSettings(settings: AppSettings): Promise<void> {
     const tx = db.transaction('settings', 'readwrite');
     const store = tx.objectStore('settings');
     const request = store.put(settings);
-    request.onsuccess = () => resolve();
+    request.onsuccess = () => {
+      syncPushSettings(settings);
+      resolve();
+    };
     request.onerror = () => reject(request.error);
   });
 }

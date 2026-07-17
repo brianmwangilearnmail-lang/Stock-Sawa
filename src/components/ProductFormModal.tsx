@@ -5,6 +5,7 @@
 
 import React, { useState, useRef } from 'react';
 import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 import { Product } from '../types';
 import { saveProduct } from '../db/indexedDb';
 
@@ -45,30 +46,23 @@ export default function ProductFormModal({ onClose, onSuccess, productToEdit }: 
     compressAndSetImage(file);
   };
 
-  const compressAndSetImage = (file: File) => {
+  const compressAndSetImage = async (file: File) => {
     setIsCompressing(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 400;
-        const scaleSize = MAX_WIDTH / img.width;
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * scaleSize;
-
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          // Compress quality to 0.7 for extremely lightweight base64 storage in IndexedDB
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-          setImageUrl(compressedBase64);
-        }
-        setIsCompressing(false);
+    try {
+      const options = {
+        maxSizeMB: 0.1,
+        maxWidthOrHeight: 800,
+        useWebWorker: true,
+        fileType: 'image/webp'
       };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+      const compressedFile = await imageCompression(file, options);
+      const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
+      setImageUrl(base64);
+    } catch (error) {
+      console.error('Error compressing image:', error);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   // Camera Snapshot (Module 1.2)
@@ -92,14 +86,19 @@ export default function ProductFormModal({ onClose, onSuccess, productToEdit }: 
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      canvas.width = 400;
-      canvas.height = (video.videoHeight / video.videoWidth) * 400;
+      canvas.width = 800;
+      canvas.height = (video.videoHeight / video.videoWidth) * 800;
 
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        setImageUrl(dataUrl);
+        
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const file = new File([blob], 'camera-snap.jpg', { type: 'image/jpeg' });
+            await compressAndSetImage(file);
+          }
+        }, 'image/jpeg', 0.9);
       }
       stopCameraStream();
     }

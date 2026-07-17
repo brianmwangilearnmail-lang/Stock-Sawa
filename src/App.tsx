@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { 
   Boxes, Store, CreditCard, History, Search, Barcode, Plus, 
   Wifi, WifiOff, RefreshCw, AlertTriangle, HelpCircle, RotateCcw, ShieldCheck, CheckCircle,
-  Shield, User, Lock, MinusCircle, LayoutDashboard
+  Shield, User, Lock, MinusCircle, LayoutDashboard, Loader2
 } from 'lucide-react';
 import { Product, Customer, InventoryTransaction, DeniTransaction } from './types';
 import { 
@@ -17,13 +17,19 @@ import {
 import BottomDeductionModal from './components/BottomDeductionModal';
 import ProductFormModal from './components/ProductFormModal';
 import BarcodeScanner from './components/BarcodeScanner';
-import DeniLedgerView from './components/DeniLedgerView';
-import AuditLogView from './components/AuditLogView';
-import DashboardView from './components/DashboardView';
+import AuthPage from './components/AuthPage';
+import { syncPullAll } from './lib/syncEngine';
+import { supabase } from './lib/supabase';
 
-import ProfileView from './components/ProfileView';
-
+// Lazy loaded components for code splitting
+const DeniLedgerView = lazy(() => import('./components/DeniLedgerView'));
+const AuditLogView = lazy(() => import('./components/AuditLogView'));
+const DashboardView = lazy(() => import('./components/DashboardView'));
+const ProfileView = lazy(() => import('./components/ProfileView'));
 export default function App() {
+  const [session, setSession] = useState<any>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
   // Database state
   const [products, setProducts] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<InventoryTransaction[]>([]);
@@ -48,6 +54,22 @@ export default function App() {
 
   // Initialize DB on mount
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsAuthChecking(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!session) return;
     async function loadData() {
       await initDb();
       await seedInitialDataIfNeeded();
@@ -61,7 +83,7 @@ export default function App() {
       await refreshAllData();
     }
     loadData();
-  }, []);
+  }, [session]);
 
   // Theme observer
   useEffect(() => {
@@ -115,53 +137,21 @@ export default function App() {
 
   const triggerBackgroundResync = async () => {
     setIsSyncing(true);
-    setSyncToast('Reconnecting... Batch uploading offline ledger entries...');
+    setSyncToast('Reconnecting... Syncing with Supabase Cloud...');
 
-    // Simulate batch upload and sequental database reconciliation delay
-    setTimeout(async () => {
-      try {
-        const db = await initDb();
-        
-        // 1. Sync Inventory Transactions
-        const txStore = db.transaction('transactions', 'readwrite').objectStore('transactions');
-        const txRequest = txStore.getAll();
-        txRequest.onsuccess = () => {
-          const allTx = txRequest.result as InventoryTransaction[];
-          allTx.forEach(tx => {
-            if (tx.syncStatus === 'pending_sync') {
-              tx.syncStatus = 'synced';
-              txStore.put(tx);
-            }
-          });
-        };
-
-        // 2. Sync Deni Transactions
-        const deniStore = db.transaction('deni_transactions', 'readwrite').objectStore('deni_transactions');
-        const deniRequest = deniStore.getAll();
-        deniRequest.onsuccess = () => {
-          const allDeni = deniRequest.result as DeniTransaction[];
-          allDeni.forEach(dt => {
-            if (dt.syncStatus === 'pending_sync') {
-              dt.syncStatus = 'synced';
-              deniStore.put(dt);
-            }
-          });
-        };
-
-        setTimeout(async () => {
-          await refreshAllData();
-          setIsSyncing(false);
-          setSyncToast('Database Synced! All shelf levels reconciled.');
-          setTimeout(() => setSyncToast(null), 3000);
-        }, 1000);
-
-      } catch (err) {
-        console.error('Sync failed', err);
-        setIsSyncing(false);
-        setSyncToast('Sync completed with local cache.');
-        setTimeout(() => setSyncToast(null), 3000);
-      }
-    }, 1500);
+    try {
+      const db = await initDb();
+      await syncPullAll(db);
+      await refreshAllData();
+      setIsSyncing(false);
+      setSyncToast('Database Synced! All records reconciled.');
+      setTimeout(() => setSyncToast(null), 3000);
+    } catch (err) {
+      console.error('Sync failed', err);
+      setIsSyncing(false);
+      setSyncToast('Sync completed with local cache.');
+      setTimeout(() => setSyncToast(null), 3000);
+    }
   };
 
   const handleBarcodeScan = (scannedSku: string) => {
@@ -205,6 +195,18 @@ export default function App() {
     
     return matchesSearch;
   });
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <AuthPage onSuccess={() => refreshAllData()} />;
+  }
 
   return (
     <div id="app-root-container" className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col text-slate-800 dark:text-slate-200 antialiased selection:bg-emerald-500/10 selection:text-emerald-900 transition-colors duration-300">
@@ -337,14 +339,19 @@ export default function App() {
         </div>
 
         {/* Tab content renderer */}
-        {activeTab === 'dashboard' && (
-          <DashboardView
-            products={products}
-            transactions={transactions}
-            customers={customers}
-            setActiveTab={setActiveTab}
-          />
-        )}
+        <Suspense fallback={
+          <div className="flex items-center justify-center p-12">
+            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+          </div>
+        }>
+          {activeTab === 'dashboard' && (
+            <DashboardView
+              products={products}
+              transactions={transactions}
+              customers={customers}
+              setActiveTab={setActiveTab}
+            />
+          )}
 
         {activeTab === 'inventory' && (
           <div className="space-y-4 sm:space-y-6">
@@ -587,6 +594,7 @@ export default function App() {
             />
           </div>
         )}
+        </Suspense>
 
       </main>
 
