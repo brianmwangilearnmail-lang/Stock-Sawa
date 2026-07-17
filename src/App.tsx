@@ -6,7 +6,7 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { 
   Boxes, Store, CreditCard, History, Search, Barcode, Plus, 
-  Wifi, WifiOff, RefreshCw, AlertTriangle, HelpCircle, RotateCcw, ShieldCheck, CheckCircle,
+  Wifi, WifiOff, RefreshCw, AlertTriangle, HelpCircle, RotateCcw, ShieldCheck, CheckCircle, Check,
   Shield, User, Lock, MinusCircle, LayoutDashboard, Loader2
 } from 'lucide-react';
 import { Product, Customer, InventoryTransaction, DeniTransaction } from './types';
@@ -20,6 +20,7 @@ import BarcodeScanner from './components/BarcodeScanner';
 import AuthPage from './components/AuthPage';
 import { syncPullAll } from './lib/syncEngine';
 import { supabase } from './lib/supabase';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy loaded components for code splitting
 const DeniLedgerView = lazy(() => import('./components/DeniLedgerView'));
@@ -355,12 +356,14 @@ export default function App() {
         </div>
 
         {/* Tab content renderer */}
+        <ErrorBoundary>
         <Suspense fallback={
           <div className="flex items-center justify-center p-12">
             <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
           </div>
         }>
           {activeTab === 'dashboard' && (
+            <ErrorBoundary>
             <DashboardView
               products={products}
               transactions={transactions}
@@ -368,6 +371,7 @@ export default function App() {
               username={session?.user?.user_metadata?.username || session?.user?.email?.split('@')[0] || 'Shop Owner'}
               setActiveTab={setActiveTab}
             />
+            </ErrorBoundary>
           )}
 
         {activeTab === 'inventory' && (
@@ -575,6 +579,7 @@ export default function App() {
         )}
 
         {activeTab === 'credit' && (
+          <ErrorBoundary>
           <DeniLedgerView 
             customers={customers} 
             products={products}
@@ -585,9 +590,11 @@ export default function App() {
               setTimeout(() => setAppToast(null), 3000);
             }}
           />
+          </ErrorBoundary>
         )}
 
         {activeTab === 'profile' && (
+          <ErrorBoundary>
           <ProfileView 
             userRole={userRole}
             setUserRole={setUserRole}
@@ -606,6 +613,7 @@ export default function App() {
               setTimeout(() => setAppToast(null), 3000);
             }}
           />
+          </ErrorBoundary>
         )}
 
         {activeTab === 'activity' && (
@@ -622,6 +630,7 @@ export default function App() {
           </div>
         )}
         </Suspense>
+        </ErrorBoundary>
 
       </main>
 
