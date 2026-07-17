@@ -1,0 +1,6 @@
+{
+  "name": "StockSawa",
+  "description": "Stock Yako, Sawa Kila Wakati. Mobile-first inventory management and audit tracker for Kenyan retail shops.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
