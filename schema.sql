@@ -100,6 +100,15 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('product-images', 'product-images', true)
 ON CONFLICT (id) DO NOTHING;
 
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Updates" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated Deletes" ON storage.objects;
+DROP POLICY IF EXISTS "Public Uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Public Updates" ON storage.objects;
+DROP POLICY IF EXISTS "Public Deletes" ON storage.objects;
+
 -- Allow public read access to the product-images bucket
 CREATE POLICY "Public Access" 
 ON storage.objects FOR SELECT 

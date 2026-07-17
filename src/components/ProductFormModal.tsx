@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload, Trash2 } from 'lucide-react';
+import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload, Trash2, AlertTriangle } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { Product } from '../types';
 import { saveProduct, deleteProduct } from '../db/indexedDb';
@@ -26,6 +26,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
   
   const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [useCamera, setUseCamera] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -376,13 +377,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
             {productToEdit && onDelete && (
               <button
                 type="button"
-                onClick={async () => {
-                  if (window.confirm(`Delete "${productToEdit.name}" permanently? This cannot be undone.`)) {
-                    await deleteProduct(productToEdit.id);
-                    onDelete(productToEdit.id);
-                    onClose();
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="p-3 rounded-xl border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer active:scale-95"
                 title="Delete product"
               >
@@ -406,6 +401,45 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
             </button>
           </div>
         </form>
+        
+        {/* Custom Delete Confirmation Overlay */}
+        {showDeleteConfirm && productToEdit && (
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-[fadeIn_0.2s_ease-out] rounded-2xl sm:rounded-3xl">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-[slideUp_0.3s_ease-out]">
+              <div className="p-5 flex gap-4">
+                <div className="h-10 w-10 shrink-0 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Delete Product</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Are you sure you want to permanently delete <strong className="text-slate-700 dark:text-slate-200">"{productToEdit.name}"</strong>? This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await deleteProduct(productToEdit.id);
+                    if (onDelete) onDelete(productToEdit.id);
+                    onClose();
+                  }}
+                  className="px-4 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-md transition-colors cursor-pointer"
+                >
+                  Delete Permanently
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
