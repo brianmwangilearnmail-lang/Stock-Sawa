@@ -575,6 +575,7 @@ export default function App() {
             theme={theme}
             onSetTheme={handleSetTheme}
             handleResetDb={handleResetDb}
+            onLogout={() => setSession(null)}
             products={products}
             transactions={transactions}
             setActiveTab={setActiveTab}

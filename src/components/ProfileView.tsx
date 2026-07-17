@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Shield, ShieldCheck, User, Lock, RotateCcw, KeyRound, AlertCircle, CheckCircle2, Moon, Sun } from 'lucide-react';
+import { Shield, ShieldCheck, User, Lock, RotateCcw, KeyRound, AlertCircle, CheckCircle2, Moon, Sun, LogOut } from 'lucide-react';
 import AuditLogView from './AuditLogView';
 import { InventoryTransaction, Product } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface ProfileViewProps {
   userRole: 'admin' | 'employee';
@@ -11,6 +12,7 @@ interface ProfileViewProps {
   theme: 'light' | 'dark';
   onSetTheme: (theme: 'light' | 'dark') => Promise<void>;
   handleResetDb: () => void;
+  onLogout: () => void;
   products: Product[];
   transactions: InventoryTransaction[];
   setActiveTab: (tab: 'dashboard' | 'inventory' | 'credit' | 'profile' | 'activity') => void;
@@ -24,6 +26,7 @@ export default function ProfileView({
   theme,
   onSetTheme,
   handleResetDb, 
+  onLogout,
   products, 
   transactions, 
   setActiveTab 
@@ -213,6 +216,24 @@ export default function ProfileView({
             </div>
           </button>
         </div>
+      </div>
+
+      {/* Account Section */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div className="space-y-1">
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Account</span>
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Session Management</h2>
+        </div>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            onLogout();
+          }}
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-800/50 text-sm font-bold transition-all cursor-pointer active:scale-95"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Log Out of StockSawa</span>
+        </button>
       </div>
 
       {/* PIN Setup/Entry Modal */}
