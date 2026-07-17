@@ -431,8 +431,7 @@ export async function resetDatabase(): Promise<void> {
       tx.objectStore(storeName).clear();
     });
 
-    tx.oncomplete = async () => {
-      await seedInitialDataIfNeeded();
+    tx.oncomplete = () => {
       resolve();
     };
     tx.onerror = () => reject(tx.error);
