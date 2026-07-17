@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload, Trash2, AlertTriangle } from 'lucide-react';
+import { X, Camera, Image as ImageIcon, Barcode, HelpCircle, Save, Sparkles, Upload, Trash2, AlertTriangle, AlertCircle, CheckCircle } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
 import { Product } from '../types';
 import { saveProduct, deleteProduct } from '../db/indexedDb';
@@ -27,6 +27,12 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
   const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [useCamera, setUseCamera] = useState<boolean>(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [localToast, setLocalToast] = useState<{ msg: string; type: 'error' | 'success' } | null>(null);
+
+  const showToastMsg = (msg: string, type: 'error' | 'success' = 'error') => {
+    setLocalToast({ msg, type });
+    setTimeout(() => setLocalToast(null), 3500);
+  };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -79,7 +85,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
       }
     } catch (err) {
       console.error('Camera capture failed', err);
-      alert('Could not open camera stream. Please upload an image file instead.');
+      showToastMsg('Could not open camera. Please upload an image file instead.');
       setUseCamera(false);
     }
   };
@@ -118,7 +124,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
     e.preventDefault();
 
     if (!name.trim() || !sku.trim()) {
-      alert('Product Name and SKU/Barcode are mandatory!');
+      showToastMsg('Product Name and SKU/Barcode are mandatory!');
       return;
     }
 
@@ -126,12 +132,12 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
     const cPrice = Number(costPrice);
 
     if (isNaN(sPrice) || sPrice <= 0) {
-      alert('Selling Price must be a positive number!');
+      showToastMsg('Selling Price must be a positive number!');
       return;
     }
 
     if (isNaN(cPrice) || cPrice < 0) {
-      alert('Cost price must be zero or positive!');
+      showToastMsg('Cost price must be zero or positive!');
       return;
     }
 
@@ -151,7 +157,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
       onSuccess(updatedProduct);
     } catch (err) {
       console.error(err);
-      alert('Could not save product. Check database configurations.');
+      showToastMsg('Could not save product. Check database configurations.');
     }
   };
 
@@ -159,8 +165,21 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
     <div id="product-form-modal-overlay" className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
       <div 
         id="product-form-modal-card"
-        className="bg-white w-full max-w-md max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 flex flex-col animate-[scaleIn_0.2s_ease-out]"
+        className="bg-white dark:bg-slate-900 w-full max-w-md max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col animate-[scaleIn_0.2s_ease-out]"
       >
+        {/* Inline Toast */}
+        {localToast && (
+          <div className={`flex items-center gap-2.5 px-4 py-3 text-xs font-bold animate-[slideDown_0.2s_ease-out] ${
+            localToast.type === 'error'
+              ? 'bg-rose-600 text-white'
+              : 'bg-emerald-600 text-white'
+          }`}>
+            {localToast.type === 'error'
+              ? <AlertCircle className="h-4 w-4 shrink-0" />
+              : <CheckCircle className="h-4 w-4 shrink-0" />}
+            <span>{localToast.msg}</span>
+          </div>
+        )}
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-2">

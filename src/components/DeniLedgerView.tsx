@@ -40,6 +40,13 @@ export default function DeniLedgerView({
   const [isSavingRepay, setIsSavingRepay] = useState<boolean>(false);
   const [showOverpayConfirm, setShowOverpayConfirm] = useState<boolean>(false);
 
+  // Inline error for modals (no browser alert)
+  const [localError, setLocalError] = useState<string | null>(null);
+  const showErr = (msg: string) => {
+    setLocalError(msg);
+    setTimeout(() => setLocalError(null), 3500);
+  };
+
   // New customer states
   const [showAddCustomer, setShowAddCustomer] = useState<boolean>(false);
   const [newCustName, setNewCustName] = useState<string>('');
@@ -108,7 +115,7 @@ export default function DeniLedgerView({
     if (recordCreditOnOnboard) {
       const parsedCost = Number(onboardTotalCost);
       if (isNaN(parsedCost) || parsedCost < 0) {
-        alert('Please enter a valid cost amount.');
+        showErr('Please enter a valid cost amount.');
         return;
       }
       initialDebt = parsedCost;
@@ -187,7 +194,7 @@ export default function DeniLedgerView({
       setShowAddCustomer(false);
     } catch (err) {
       console.error(err);
-      alert('Failed to register customer and record credit. Please try again.');
+      showErr('Failed to register customer and credit. Please try again.');
     }
   };
 
@@ -197,7 +204,7 @@ export default function DeniLedgerView({
 
     const parsedCost = Number(creditTotalCost);
     if (isNaN(parsedCost) || parsedCost <= 0) {
-      alert('Please enter a valid credit/cost amount.');
+      showErr('Please enter a valid credit/cost amount.');
       return;
     }
 
@@ -273,7 +280,7 @@ export default function DeniLedgerView({
       if (showToast) showToast('Credit recorded successfully!');
     } catch (err) {
       console.error(err);
-      alert('Failed to record credit purchase.');
+      showErr('Failed to record credit purchase.');
     } finally {
       setIsSavingCredit(false);
     }
@@ -285,7 +292,7 @@ export default function DeniLedgerView({
 
     const repayVal = Number(repaymentAmount);
     if (isNaN(repayVal) || repayVal <= 0) {
-      alert('Please enter a valid repayment amount.');
+      showErr('Please enter a valid repayment amount.');
       return;
     }
 
@@ -331,7 +338,7 @@ export default function DeniLedgerView({
       if (showToast) showToast('Debt paid successfully!');
     } catch (err) {
       console.error(err);
-      alert('Repayment save failed');
+      showErr('Repayment save failed. Please try again.');
     } finally {
       setIsSavingRepay(false);
     }
@@ -635,6 +642,14 @@ export default function DeniLedgerView({
                 placeholder="e.g. Cleared by cash on Friday morning"
               />
             </div>
+
+            {/* Inline error display */}
+            {localError && (
+              <div className="flex items-center gap-2 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 px-3.5 py-2.5 rounded-xl text-xs font-semibold animate-[slideDown_0.2s_ease-out]">
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                <span>{localError}</span>
+              </div>
+            )}
 
             <div className="flex gap-2.5 pt-1">
               <button

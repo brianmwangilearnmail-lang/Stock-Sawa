@@ -55,6 +55,13 @@ export default function BottomDeductionModal({
   const [pinCode, setPinCode] = useState<string>('');
   const [pinError, setPinError] = useState<string | null>(null);
 
+  // Inline error toast (replaces browser alert)
+  const [inlineError, setInlineError] = useState<string | null>(null);
+  const showError = (msg: string) => {
+    setInlineError(msg);
+    setTimeout(() => setInlineError(null), 3500);
+  };
+
   // Submission loading state
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -96,7 +103,7 @@ export default function BottomDeductionModal({
   const handleSubmitTrigger = () => {
     // Validation first
     if (quantity > product.quantity) {
-      alert('Cannot deduct more than available shelf stock!');
+      showError('Cannot deduct more than available shelf stock!');
       return;
     }
 
@@ -106,7 +113,7 @@ export default function BottomDeductionModal({
 
     if (selectedReason === 'Sale_Mpesa') {
       if (!/^0(7|1)\d{8}$/.test(mpesaPhone)) {
-        alert('Please enter a valid Kenyan Safaricom Number (e.g. 0712345678)');
+        showError('Please enter a valid Kenyan Safaricom Number (e.g. 0712345678)');
         return;
       }
       initiateMpesaPush();
@@ -114,7 +121,7 @@ export default function BottomDeductionModal({
     }
 
     if (selectedReason === 'Deni' && !selectedCustomer) {
-      alert('Please select or add a customer to log debt against!');
+      showError('Please select or add a customer to log debt against!');
       return;
     }
 
@@ -224,7 +231,7 @@ export default function BottomDeductionModal({
       onSuccess();
     } catch (err) {
       console.error(err);
-      alert('Error updating database stores');
+      showError('Error saving deduction. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -588,6 +595,14 @@ export default function BottomDeductionModal({
           <div className="text-[10px] text-slate-400 dark:text-slate-500 text-center font-medium mt-1">
             Secured Audit Trail. Action will generate an unalterable log.
           </div>
+
+          {/* Inline Error Toast */}
+          {inlineError && (
+            <div className="flex items-center gap-2 bg-rose-600 text-white px-3.5 py-2.5 rounded-xl text-xs font-semibold animate-[slideDown_0.2s_ease-out]">
+              <AlertCircle className="h-4 w-4 shrink-0" />
+              <span>{inlineError}</span>
+            </div>
+          )}
         </div>
       </div>
 

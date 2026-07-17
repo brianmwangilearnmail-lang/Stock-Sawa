@@ -108,7 +108,9 @@ export default function ProfileView({
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to update username. Please try again.');
+      if (showToast) {
+        showToast('⚠ Failed to update username. Please try again.');
+      }
     } finally {
       setIsUpdatingUsername(false);
     }
