@@ -257,13 +257,15 @@ export default function ProfileView({
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Session Management</h2>
         </div>
         
-        <form onSubmit={handleUpdateUsername} className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <form onSubmit={handleUpdateUsername} autoComplete="off" className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
           <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Display Username
           </label>
           <div className="flex flex-col sm:flex-row gap-3">
             <input 
               type="text" 
+              name="display-username-field"
+              autoComplete="off"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               className="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -331,6 +333,8 @@ export default function ProfileView({
                         <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">New 4-Digit PIN</label>
                         <input
                           type="password"
+                          name="new-admin-pin-1"
+                          autoComplete="new-password"
                           maxLength={4}
                           inputMode="numeric"
                           value={newPin}
@@ -343,6 +347,8 @@ export default function ProfileView({
                         <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Confirm PIN</label>
                         <input
                           type="password"
+                          name="new-admin-pin-2"
+                          autoComplete="new-password"
                           maxLength={4}
                           inputMode="numeric"
                           value={confirmPin}
@@ -357,6 +363,8 @@ export default function ProfileView({
                       <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider ml-1">Enter PIN</label>
                       <input
                         type="password"
+                        name="auth-admin-pin"
+                        autoComplete="new-password"
                         autoFocus
                         maxLength={4}
                         inputMode="numeric"

@@ -60,14 +60,22 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
       const options = {
         maxSizeMB: 0.1,
         maxWidthOrHeight: 800,
-        useWebWorker: true,
+        useWebWorker: false, // safer on mobile WebView/PWA
         fileType: 'image/webp'
       };
       const compressedFile = await imageCompression(file, options);
       const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
       setImageUrl(base64);
     } catch (error) {
-      console.error('Error compressing image:', error);
+      console.error('Error compressing image, falling back to original:', error);
+      // Fallback if compression fails (common on some mobile browsers)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImageUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
     } finally {
       setIsCompressing(false);
     }
