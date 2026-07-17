@@ -8,10 +8,11 @@ interface DashboardViewProps {
   products: Product[];
   transactions: InventoryTransaction[];
   customers: Customer[];
+  username: string;
   setActiveTab: (tab: 'dashboard' | 'inventory' | 'credit' | 'profile' | 'activity') => void;
 }
 
-export default function DashboardView({ products, transactions, customers, setActiveTab }: DashboardViewProps) {
+export default function DashboardView({ products, transactions, customers, username, setActiveTab }: DashboardViewProps) {
   const stats = useMemo(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -79,7 +80,7 @@ export default function DashboardView({ products, transactions, customers, setAc
   return (
     <div className="space-y-6 sm:space-y-8 animate-[fadeIn_0.3s_ease-out]">
       <div className="space-y-1 px-2 sm:px-0">
-        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome, Brian</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome, {username || 'Shop Owner'} 👋</h2>
         <p className="text-slate-500 dark:text-slate-400 font-medium">Here's your store overview</p>
       </div>
 

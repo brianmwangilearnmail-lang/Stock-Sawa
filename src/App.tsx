@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Product, Customer, InventoryTransaction, DeniTransaction } from './types';
 import { 
-  getProducts, getTransactions, getCustomers, seedInitialDataIfNeeded, 
+  getProducts, getTransactions, getCustomers,
   initDb, resetDatabase, getSettings, saveSettings 
 } from './db/indexedDb';
 import BottomDeductionModal from './components/BottomDeductionModal';
@@ -72,7 +72,7 @@ export default function App() {
     if (!session) return;
     async function loadData() {
       await initDb();
-      await seedInitialDataIfNeeded();
+      // No seed data - new accounts start fresh
       
       const settings = await getSettings();
       if (settings) {
@@ -349,6 +349,7 @@ export default function App() {
               products={products}
               transactions={transactions}
               customers={customers}
+              username={session?.user?.user_metadata?.username || session?.user?.email?.split('@')[0] || 'Shop Owner'}
               setActiveTab={setActiveTab}
             />
           )}
