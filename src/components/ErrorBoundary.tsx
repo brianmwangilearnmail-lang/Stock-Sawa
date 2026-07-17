@@ -23,6 +23,17 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('App ErrorBoundary caught:', error, info);
+    
+    // Auto-reload on Vite chunk load errors (happens when deploying new versions)
+    const isChunkLoadError = error?.message?.includes('Failed to fetch dynamically imported module');
+    if (isChunkLoadError) {
+      // Use sessionStorage to prevent infinite reload loops
+      const hasReloaded = sessionStorage.getItem('chunk_reload_attempted');
+      if (!hasReloaded) {
+        sessionStorage.setItem('chunk_reload_attempted', 'true');
+        window.location.reload();
+      }
+    }
   }
 
   handleRetry = () => {
