@@ -54,6 +54,8 @@ export default function AuditLogView({ products, transactions, setActiveTab }: A
     return matchesSearch;
   });
 
+  const [selectedTx, setSelectedTx] = useState<InventoryTransaction | null>(null);
+
   // Financial Stats calculations
   let totalSalesVal = 0;
   let totalShrinkageVal = 0;
@@ -185,10 +187,11 @@ export default function AuditLogView({ products, transactions, setActiveTab }: A
             const isDeni = tx.reasonCategory === 'Deni';
             
             return (
-              <div
+              <button
                 key={tx.id}
                 id={`audit-log-${tx.id}`}
-                className="p-3.5 bg-slate-50/40 dark:bg-slate-800/40 hover:bg-slate-50/80 dark:hover:bg-slate-800/80 rounded-xl border border-slate-150 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors"
+                onClick={() => setSelectedTx(tx)}
+                className="w-full text-left p-3.5 bg-slate-50/40 dark:bg-slate-800/40 hover:bg-slate-50/80 dark:hover:bg-slate-800/80 rounded-xl border border-slate-150 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors cursor-pointer active:scale-[0.99]"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -242,14 +245,14 @@ export default function AuditLogView({ products, transactions, setActiveTab }: A
                       ? 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-800' 
                       : 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800'
                   }`}>
-                    {tx.quantityChanged} units
+                    {tx.quantityChanged > 0 ? '+' : ''}{tx.quantityChanged} units
                   </span>
                   
                   <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-medium">
                     Valued: KES {Math.abs(tx.quantityChanged) * (tx.reasonCategory === 'Expired' || tx.reasonCategory === 'Damaged' || tx.reasonCategory === 'Other' ? getProductCost(tx.productId) : getProductPrice(tx.productId))}
                   </span>
                 </div>
-              </div>
+              </button>
             );
           })}
 
@@ -261,6 +264,89 @@ export default function AuditLogView({ products, transactions, setActiveTab }: A
         </div>
 
       </div>
+
+      {/* Transaction Details Modal */}
+      {selectedTx && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-900/40 dark:bg-slate-900/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+          <div 
+            className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-[slideUp_0.3s_ease-out]"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <History className="h-4 w-4 text-emerald-600" />
+                Transaction Receipt
+              </h3>
+              <button 
+                onClick={() => setSelectedTx(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="text-center space-y-1">
+                <div className="text-2xl font-black text-slate-900 dark:text-white mb-1">{getProductName(selectedTx.productId)}</div>
+                <div className={`inline-flex items-center justify-center text-xs font-bold px-3 py-1 rounded-full border ${
+                  selectedTx.quantityChanged < 0 
+                    ? 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-800' 
+                    : 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800'
+                }`}>
+                  {selectedTx.quantityChanged > 0 ? 'Stock In: ' : 'Stock Out: '}
+                  {Math.abs(selectedTx.quantityChanged)} units
+                </div>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 p-4 space-y-3 font-mono text-xs">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Transaction ID</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{selectedTx.id.substring(0, 8).toUpperCase()}...</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Date & Time</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{new Date(selectedTx.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Category</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{selectedTx.reasonCategory.replace('_', ' ')}</span>
+                </div>
+                <div className="flex justify-between border-t border-dashed border-slate-200 dark:border-slate-700 pt-3 mt-3">
+                  <span className="text-slate-500">Total Value</span>
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    KES {Math.abs(selectedTx.quantityChanged) * (['Expired', 'Damaged', 'Other'].includes(selectedTx.reasonCategory) ? getProductCost(selectedTx.productId) : getProductPrice(selectedTx.productId))}
+                  </span>
+                </div>
+              </div>
+
+              {(selectedTx.customReason || selectedTx.staffPinUsed) && (
+                <div className="space-y-3">
+                  {selectedTx.customReason && (
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl p-3 text-xs text-amber-800 dark:text-amber-400">
+                      <strong>Notes:</strong> {selectedTx.customReason}
+                    </div>
+                  )}
+                  {selectedTx.staffPinUsed && (
+                    <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl p-3 text-xs text-emerald-800 dark:text-emerald-400 flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 shrink-0" />
+                      <span>Authorized by Manager PIN: <strong>{selectedTx.staffPinUsed}</strong></span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-700">
+              <button 
+                onClick={() => setSelectedTx(null)}
+                className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm rounded-xl shadow-md transition-colors"
+              >
+                Close Receipt
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
