@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Store, Key, Mail, Lock, ShieldCheck, Loader2 } from 'lucide-react';
+import { Store, Key, Mail, Lock, ShieldCheck, Loader2, User, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface AuthPageProps {
@@ -10,23 +10,31 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMsg(null);
 
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: { username }
+          }
+        });
         if (error) throw error;
-        // Auto sign-in doesn't always work if email confirmation is required, but let's assume it's disabled for this demo.
-        alert('Signup successful! You can now log in.');
+        setSuccessMsg('Signup successful! You can now log in.');
         setIsLogin(true);
       }
       onSuccess();
@@ -55,7 +63,33 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
           </div>
         )}
 
+        {successMsg && (
+          <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-semibold border border-emerald-200 dark:border-emerald-800/50 flex items-start gap-2 animate-[scaleIn_0.2s_ease-out]">
+            <CheckCircle2 className="h-5 w-5 shrink-0" />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
+          {!isLogin && (
+            <div className="space-y-1.5 animate-[fadeIn_0.2s_ease-out]">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                Shop Name / Username
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  required={!isLogin}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-3 pl-10 pr-4 text-sm font-semibold focus:ring-2 focus:ring-emerald-600 focus:outline-none placeholder-slate-400"
+                  placeholder="My Supermarket"
+                />
+              </div>
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
               Email Address
@@ -106,6 +140,7 @@ export default function AuthPage({ onSuccess }: AuthPageProps) {
             onClick={() => {
               setIsLogin(!isLogin);
               setError(null);
+              setSuccessMsg(null);
             }}
             className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
           >
