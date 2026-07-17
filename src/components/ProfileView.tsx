@@ -16,6 +16,8 @@ interface ProfileViewProps {
   products: Product[];
   transactions: InventoryTransaction[];
   setActiveTab: (tab: 'dashboard' | 'inventory' | 'credit' | 'profile' | 'activity') => void;
+  username: string;
+  showToast?: (msg: string) => void;
 }
 
 export default function ProfileView({ 
@@ -29,7 +31,9 @@ export default function ProfileView({
   onLogout,
   products, 
   transactions, 
-  setActiveTab 
+  setActiveTab,
+  username,
+  showToast
 }: ProfileViewProps) {
   const [showPinPrompt, setShowPinPrompt] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -38,6 +42,10 @@ export default function ProfileView({
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  
+  // Username update states
+  const [newUsername, setNewUsername] = useState(username);
+  const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
   const handleSwitchToAdmin = () => {
     if (!adminPin) {
@@ -82,6 +90,28 @@ export default function ProfileView({
       setConfirmPin('');
       setPinError(null);
     }, 1500);
+  };
+  
+  const handleUpdateUsername = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim() || newUsername === username) return;
+    
+    setIsUpdatingUsername(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { username: newUsername.trim() }
+      });
+      if (error) throw error;
+      
+      if (showToast) {
+        showToast('Username updated successfully!');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update username. Please try again.');
+    } finally {
+      setIsUpdatingUsername(false);
+    }
   };
   return (
     <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
@@ -224,6 +254,29 @@ export default function ProfileView({
           <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Account</span>
           <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Session Management</h2>
         </div>
+        
+        <form onSubmit={handleUpdateUsername} className="space-y-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Display Username
+          </label>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input 
+              type="text" 
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value)}
+              className="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              placeholder="Your username"
+            />
+            <button 
+              type="submit"
+              disabled={isUpdatingUsername || newUsername === username || !newUsername.trim()}
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed"
+            >
+              {isUpdatingUsername ? 'Updating...' : 'Update Name'}
+            </button>
+          </div>
+        </form>
+
         <button
           onClick={async () => {
             await supabase.auth.signOut();

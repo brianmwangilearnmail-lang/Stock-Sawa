@@ -19,13 +19,15 @@ interface DeniLedgerViewProps {
   products: Product[];
   onRefreshCustomers: () => void;
   isOffline: boolean;
+  showToast?: (msg: string) => void;
 }
 
 export default function DeniLedgerView({
   customers,
   products,
   onRefreshCustomers,
-  isOffline
+  isOffline,
+  showToast
 }: DeniLedgerViewProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCust, setSelectedCust] = useState<Customer | null>(null);
@@ -266,6 +268,8 @@ export default function DeniLedgerView({
       setCreditQuantity(1);
       setCreditTotalCost('');
       setShowAddCreditModal(false);
+      
+      if (showToast) showToast('Credit recorded successfully!');
     } catch (err) {
       console.error(err);
       alert('Failed to record credit purchase.');
@@ -325,6 +329,8 @@ export default function DeniLedgerView({
       setRepaymentAmount('');
       setRepaymentNotes('');
       setShowRepayModal(false);
+      
+      if (showToast) showToast('Debt paid successfully!');
     } catch (err) {
       console.error(err);
       alert('Repayment save failed');

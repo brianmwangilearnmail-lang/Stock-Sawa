@@ -18,12 +18,9 @@ interface BottomDeductionModalProps {
   onSuccess: () => void;
   onAddCustomer: (newCust: Customer) => void;
   isOffline: boolean;
+  adminPin: string | null;
+  showToast?: (msg: string) => void;
 }
-
-const AUTHORIZED_PINS = [
-  { pin: '1234', name: 'Mama Mboga (Owner)' },
-  { pin: '5555', name: 'Njoroge (Manager)' }
-];
 
 export default function BottomDeductionModal({
   product,
@@ -31,7 +28,9 @@ export default function BottomDeductionModal({
   onClose,
   onSuccess,
   onAddCustomer,
-  isOffline
+  isOffline,
+  adminPin,
+  showToast
 }: BottomDeductionModalProps) {
   // Modal states
   const [selectedReason, setSelectedReason] = useState<ReasonCategory>('Sale_Cash');
@@ -152,13 +151,12 @@ export default function BottomDeductionModal({
 
   // Verify PIN
   const verifyPinAndSubmit = (enteredPin: string) => {
-    const matched = AUTHORIZED_PINS.find(p => p.pin === enteredPin);
-    if (matched) {
+    if (adminPin && enteredPin === adminPin) {
       setShowPinOverlay(false);
-      processDeduction(matched.name);
+      processDeduction('Admin PIN Confirmed');
     } else {
       setPinCode('');
-      setPinError('Invalid PIN! Only Manager or Owner PIN is authorized.');
+      setPinError('Invalid PIN! Please input the correct Admin PIN.');
     }
   };
 
@@ -220,6 +218,9 @@ export default function BottomDeductionModal({
       }
 
       setIsSubmitting(false);
+      if (showToast) {
+        showToast('Deduction successfully made!');
+      }
       onSuccess();
     } catch (err) {
       console.error(err);
@@ -659,7 +660,7 @@ export default function BottomDeductionModal({
 
             <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-4 w-full">
               <div className="text-center space-y-1.5">
-                <h4 className="text-sm font-bold text-white">Enter authorized manager PIN</h4>
+                <h4 className="text-sm font-bold text-white">Please input admin PIN</h4>
                 <p className="text-xs text-slate-400 leading-normal font-medium">
                   Non-sale actions require authorization to prevent stock shrinkage.
                 </p>
@@ -689,7 +690,7 @@ export default function BottomDeductionModal({
 
               {/* Quick Helper */}
               <div className="bg-slate-900 border border-slate-800/80 text-slate-400 p-2.5 rounded-xl text-[10px] w-full text-center font-semibold">
-                Testing authorized PINs: <strong className="text-emerald-400">1234</strong> (Mama Mboga) or <strong className="text-emerald-400">5555</strong> (Njoroge)
+                Only the designated admin PIN is allowed to authorize this action.
               </div>
             </div>
 

@@ -42,6 +42,7 @@ export default function App() {
   const [isOffline, setIsOffline] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [syncToast, setSyncToast] = useState<string | null>(null);
+  const [appToast, setAppToast] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<'admin' | 'employee'>('employee');
   const [adminPin, setAdminPin] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -259,11 +260,19 @@ export default function App() {
         </div>
       </header>
 
-      {/* Synchronizing Success/Status Toast notification */}
+      {/* Sync Status Overlay Toast */}
       {syncToast && (
-        <div id="sync-toast-alert" className="bg-emerald-800 text-white px-4 py-2.5 shadow-xl flex items-center justify-center gap-2 text-xs font-bold animate-[slideDown_0.2s_ease-out]">
-          <CheckCircle className="h-4 w-4 text-emerald-300" />
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 z-50 animate-[slideDown_0.3s_ease-out]">
+          <RefreshCw className="h-4 w-4 animate-spin" />
           <span>{syncToast}</span>
+        </div>
+      )}
+
+      {/* Global App Toast */}
+      {appToast && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 z-50 animate-[slideDown_0.3s_ease-out]">
+          <Check className="h-4 w-4" />
+          <span>{appToast}</span>
         </div>
       )}
 
@@ -564,6 +573,10 @@ export default function App() {
             products={products}
             onRefreshCustomers={refreshAllData}
             isOffline={isOffline}
+            showToast={(msg) => {
+              setAppToast(msg);
+              setTimeout(() => setAppToast(null), 3000);
+            }}
           />
         )}
 
@@ -580,6 +593,11 @@ export default function App() {
             products={products}
             transactions={transactions}
             setActiveTab={setActiveTab}
+            username={username}
+            showToast={(msg) => {
+              setAppToast(msg);
+              setTimeout(() => setAppToast(null), 3000);
+            }}
           />
         )}
 
@@ -700,6 +718,11 @@ export default function App() {
           product={selectedProduct}
           customers={customers}
           isOffline={isOffline}
+          adminPin={adminPin}
+          showToast={(msg) => {
+            setAppToast(msg);
+            setTimeout(() => setAppToast(null), 3000);
+          }}
           onClose={() => setSelectedProduct(null)}
           onSuccess={async () => {
             setSelectedProduct(null);
