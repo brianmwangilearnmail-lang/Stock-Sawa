@@ -62,8 +62,15 @@ export default function App() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setSession(null);
+      } else if (event === 'USER_UPDATED') {
+        // Only update session metadata, never set to null — prevents white screen crash
+        if (session) setSession(session);
+      } else if (session) {
+        setSession(session);
+      }
     });
 
     return () => subscription.unsubscribe();
