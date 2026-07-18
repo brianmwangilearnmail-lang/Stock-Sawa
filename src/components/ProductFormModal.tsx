@@ -52,8 +52,23 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 1. Instantly display the image using FileReader (no delay for user)
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (typeof reader.result === 'string') {
+        setImageUrl(reader.result);
+        if (showToast) {
+          showToast('Image selected successfully!');
+        } else {
+          showToastMsg('Image selected successfully!', 'success');
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // 2. Perform compression in the background
     compressAndSetImage(file);
-    e.target.value = ''; // Reset input value so selecting same file again fires onChange
+    e.target.value = ''; // Reset input value
   };
 
   const compressAndSetImage = async (file: File) => {
@@ -67,27 +82,15 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
       };
       const compressedFile = await imageCompression(file, options);
       const base64 = await imageCompression.getDataUrlFromFile(compressedFile);
-      setImageUrl(base64);
+      setImageUrl(base64); // Replace with compressed version
       if (showToast) {
-        showToast('Image uploaded and compressed successfully!');
+        showToast('Image optimized successfully!');
       } else {
-        showToastMsg('Image uploaded and compressed successfully!', 'success');
+        showToastMsg('Image optimized successfully!', 'success');
       }
     } catch (error) {
-      console.error('Error compressing image, falling back to original:', error);
-      // Fallback if compression fails (common on some mobile browsers)
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          setImageUrl(reader.result);
-          if (showToast) {
-            showToast('Original image uploaded successfully!');
-          } else {
-            showToastMsg('Original image uploaded successfully!', 'success');
-          }
-        }
-      };
-      reader.readAsDataURL(file);
+      console.error('Background compression failed, keeping original preview:', error);
+      // Fallback is already loaded via FileReader, so we just log and continue
     } finally {
       setIsCompressing(false);
     }
