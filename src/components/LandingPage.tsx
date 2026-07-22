@@ -1,5 +1,5 @@
 import React from 'react';
-import { Store, ShieldCheck, WifiOff, CreditCard, ChevronRight, Barcode, TrendingUp, Sparkles, Smartphone } from 'lucide-react';
+import { Store, ShieldCheck, WifiOff, CreditCard, ChevronRight, Barcode, TrendingUp, Sparkles, Smartphone, Download, Globe } from 'lucide-react';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -53,14 +53,27 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <p className="text-emerald-50/80 text-lg sm:text-xl max-w-xl mx-auto md:mx-0 font-medium leading-relaxed">
               Powerful Point-of-Sale features, offline resilience, and automated audit trails—designed specifically for modern Kenyan retailers.
             </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4 justify-center md:justify-start pt-2">
+            <div className="flex flex-col sm:flex-row items-center gap-3 justify-center md:justify-start pt-2 flex-wrap">
+              {/* Web App CTA */}
               <button 
                 onClick={onGetStarted}
-                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-[#024126] px-8 py-4 rounded-full text-base sm:text-lg font-black shadow-xl hover:shadow-2xl transition-all active:scale-95"
+                className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-[#024126] px-8 py-4 rounded-full text-base sm:text-lg font-black shadow-xl hover:shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-2"
               >
-                Start Using StockSawa
+                <Globe className="w-5 h-5" />
+                Continue to Web App
               </button>
-              <p className="text-sm text-emerald-200/60 font-medium">No credit card required.</p>
+
+              {/* Android Download CTA */}
+              <a 
+                href="/StockSawa.apk"
+                download="StockSawa.apk"
+                className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white px-8 py-4 rounded-full text-base sm:text-lg font-black shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Download className="w-5 h-5" />
+                Download Android App
+              </a>
+
+              <p className="w-full text-xs text-emerald-200/60 font-medium text-center md:text-left">Free forever. No credit card required.</p>
             </div>
           </div>
 
@@ -151,12 +164,28 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         <div className="mt-20 sm:mt-32 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-12 text-center shadow-sm">
           <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-4">Ready to upgrade your shop?</h3>
           <p className="text-slate-500 mb-8 max-w-lg mx-auto">Join smart retailers using StockSawa to protect their inventory and grow their profits.</p>
-          <button 
-            onClick={onGetStarted}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3.5 rounded-full text-sm font-bold shadow-md transition-transform active:scale-95"
-          >
-            Create Your Free Account
-          </button>
+          
+          {/* Download section */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button 
+              onClick={onGetStarted}
+              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-full text-sm font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Globe className="w-4 h-4" />
+              Continue to Web App
+            </button>
+
+            <a 
+              href="/StockSawa.apk"
+              download="StockSawa.apk"
+              className="w-full sm:w-auto bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-8 py-4 rounded-full text-sm font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download Android App
+            </a>
+          </div>
+
+          <p className="text-xs text-slate-400 mt-4">Android APK · Works offline · Camera barcode scanner</p>
         </div>
       </main>
       
