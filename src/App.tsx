@@ -19,7 +19,7 @@ import ProductFormModal from './components/ProductFormModal';
 import BarcodeScanner from './components/BarcodeScanner';
 import AuthPage from './components/AuthPage';
 import LandingPage from './components/LandingPage';
-import { syncPullAll, syncPushAllPending } from './lib/syncEngine';
+import { syncPullAll, syncHardPullAll, syncPushAllPending } from './lib/syncEngine';
 import { supabase } from './lib/supabase';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -85,10 +85,12 @@ export default function App() {
     async function loadData() {
       const db = await initDb();
       
-      // Auto-sync from cloud if online (handles fresh installs recovering data)
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         setIsSyncing(true);
-        await syncPullAll(db);
+        // Step 1: Push anything saved locally that didn't reach Supabase yet
+        await syncPushAllPending();
+        // Step 2: Hard pull from Supabase to get authoritative account data
+        await syncHardPullAll(db);
         setIsSyncing(false);
       }
       
@@ -102,14 +104,15 @@ export default function App() {
     }
     loadData();
 
-    // Set up Supabase Realtime subscription for seamless cross-device syncing
+    // Realtime subscription — when another device changes data, merge it in safely
     const channel = supabase
       .channel('schema-db-changes')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public' },
-        (payload) => {
-          // Whenever ANY table changes (another device made a transaction), silently pull and refresh
+        async (payload) => {
+          // Just re-read from IndexedDB + soft merge the one changed record
+          // NEVER do a full clear-replace here — it would wipe locally-added items
           silentBackgroundResync();
         }
       )
@@ -124,6 +127,7 @@ export default function App() {
     try {
       if (typeof navigator !== 'undefined' && navigator.onLine) {
         const db = await initDb();
+        // Soft merge only — NEVER clears local data
         await syncPullAll(db);
         await refreshAllData();
       }

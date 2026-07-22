@@ -33,7 +33,7 @@ export async function syncPushProduct(product: Product) {
       const fileName = `${userId}/product-${product.id}-${Date.now()}.jpg`;
       const file = await dataUrlToFile(finalImageUrl, fileName);
       
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('product-images')
         .upload(fileName, file, { upsert: true });
 
@@ -135,19 +135,22 @@ export async function syncDeleteProduct(id: string) {
   }
 }
 
-// Clear all records in a store and repopulate with fresh data from Supabase.
-// This prevents stale data from lingering when doing a full pull.
-function clearAndWriteStore(db: IDBDatabase, storeName: string, records: any[]): Promise<void> {
+// ============================================================
+// SOFT PULL — Merge only. NEVER deletes local records.
+// Safe to call on realtime events and periodic background syncs.
+// Only writes records that exist in Supabase (adds/updates).
+// ============================================================
+function mergeIntoStore(db: IDBDatabase, storeName: string, records: any[]): Promise<void> {
   return new Promise((resolve, reject) => {
+    if (!records || records.length === 0) {
+      resolve(); // Nothing to merge — do NOT clear local data
+      return;
+    }
     const tx = db.transaction(storeName, 'readwrite');
     const store = tx.objectStore(storeName);
-    const clearReq = store.clear();
-    clearReq.onsuccess = () => {
-      records.forEach(r => store.put(r));
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    };
-    clearReq.onerror = () => reject(clearReq.error);
+    records.forEach(r => store.put(r));
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
   });
 }
 
@@ -167,7 +170,50 @@ export async function syncPullAll(db: IDBDatabase) {
     if (deniRes.error) console.error('Pull deni error:', deniRes.error);
     if (settingsRes.error) console.error('Pull settings error:', settingsRes.error);
 
-    // Clear stores and write fresh data (prevents cross-account contamination)
+    // Soft merge — only add/update records, NEVER clear local data
+    await Promise.all([
+      mergeIntoStore(db, 'products', productsRes.data ?? []),
+      mergeIntoStore(db, 'transactions', transactionsRes.data ?? []),
+      mergeIntoStore(db, 'customers', customersRes.data ?? []),
+      mergeIntoStore(db, 'deni_transactions', deniRes.data ?? []),
+      mergeIntoStore(db, 'settings', settingsRes.data ?? []),
+    ]);
+  } catch (err) {
+    console.error('Failed to pull from Supabase', err);
+  }
+}
+
+// ============================================================
+// HARD PULL — Clear then replace. Use ONLY on fresh login.
+// Should only be called AFTER resetDatabase() clears old user data.
+// ============================================================
+function clearAndWriteStore(db: IDBDatabase, storeName: string, records: any[]): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const clearReq = store.clear();
+    clearReq.onsuccess = () => {
+      records.forEach(r => store.put(r));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    };
+    clearReq.onerror = () => reject(clearReq.error);
+  });
+}
+
+export async function syncHardPullAll(db: IDBDatabase) {
+  try {
+    const [productsRes, transactionsRes, customersRes, deniRes, settingsRes] = await Promise.all([
+      supabase.from('products').select('*'),
+      supabase.from('transactions').select('*'),
+      supabase.from('customers').select('*'),
+      supabase.from('deni_transactions').select('*'),
+      supabase.from('settings').select('*'),
+    ]);
+
+    if (productsRes.error) console.error('Hard pull products error:', productsRes.error);
+    if (transactionsRes.error) console.error('Hard pull transactions error:', transactionsRes.error);
+
     await Promise.all([
       clearAndWriteStore(db, 'products', productsRes.data ?? []),
       clearAndWriteStore(db, 'transactions', transactionsRes.data ?? []),
@@ -176,12 +222,14 @@ export async function syncPullAll(db: IDBDatabase) {
       clearAndWriteStore(db, 'settings', settingsRes.data ?? []),
     ]);
   } catch (err) {
-    console.error('Failed to pull from Supabase', err);
+    console.error('Failed to hard pull from Supabase', err);
   }
 }
 
-// Drain the offline queue — push all locally-saved items that are marked pending_sync.
-// Called automatically when the device comes back online.
+// ============================================================
+// OFFLINE QUEUE — Push all pending_sync records to Supabase.
+// Called when device comes back online.
+// ============================================================
 export async function syncPushAllPending(): Promise<number> {
   const db = await initDb();
   let count = 0;
@@ -207,7 +255,6 @@ export async function syncPushAllPending(): Promise<number> {
       };
     });
 
-  // Push pending products
   const products = await getAll<any>('products');
   for (const p of products.filter(p => p.syncStatus === 'pending_sync')) {
     await syncPushProduct(p);
@@ -215,7 +262,6 @@ export async function syncPushAllPending(): Promise<number> {
     count++;
   }
 
-  // Push pending transactions
   const transactions = await getAll<any>('transactions');
   for (const t of transactions.filter(t => t.syncStatus === 'pending_sync')) {
     await syncPushTransaction(t);
@@ -223,7 +269,6 @@ export async function syncPushAllPending(): Promise<number> {
     count++;
   }
 
-  // Push pending customers
   const customers = await getAll<any>('customers');
   for (const c of customers.filter(c => c.syncStatus === 'pending_sync')) {
     await syncPushCustomer(c);
@@ -231,7 +276,6 @@ export async function syncPushAllPending(): Promise<number> {
     count++;
   }
 
-  // Push pending deni transactions
   const deniTxs = await getAll<any>('deni_transactions');
   for (const d of deniTxs.filter(d => d.syncStatus === 'pending_sync')) {
     await syncPushDeniTransaction(d);
@@ -242,4 +286,3 @@ export async function syncPushAllPending(): Promise<number> {
   console.log(`[OfflineSync] Pushed ${count} pending record(s) to Supabase.`);
   return count;
 }
-
