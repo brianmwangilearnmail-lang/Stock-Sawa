@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Store, Key, Mail, Lock, ShieldCheck, Loader2, User, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { resetDatabase } from '../db/indexedDb';
 
 interface AuthPageProps {
   onSuccess: () => void;
@@ -38,6 +39,13 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
         setSuccessMsg('Signup successful! You can now log in.');
         setIsLogin(true);
       }
+      
+      // CRITICAL SECURITY MEASURE:
+      // Wipe the local database clean upon a successful login.
+      // This ensures that if the previous user didn't explicitly log out,
+      // their data won't merge with the new user's incoming data.
+      await resetDatabase();
+      
       onSuccess();
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
