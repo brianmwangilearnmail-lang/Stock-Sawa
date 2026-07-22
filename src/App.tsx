@@ -141,6 +141,28 @@ export default function App() {
     }
   };
 
+  const handleSecureLogout = async () => {
+    try {
+      // 1. Wipe the entire local IndexedDB so no data leaks to the next user
+      await resetDatabase();
+      
+      // 2. Clear all React state
+      setProducts([]);
+      setTransactions([]);
+      setCustomers([]);
+      setAdminPin(null);
+      setUserRole('employee');
+      setSearchQuery('');
+      
+      // 3. Finally clear session
+      setSession(null);
+    } catch (err) {
+      console.error('Error during secure logout:', err);
+      // Fallback
+      setSession(null);
+    }
+  };
+
   // Listen to native browser online/offline events for auto-sync
   useEffect(() => {
     const handleOnline = () => {
@@ -656,7 +678,7 @@ export default function App() {
             theme={theme}
             onSetTheme={handleSetTheme}
             handleResetDb={handleResetDb}
-            onLogout={() => setSession(null)}
+            onLogout={handleSecureLogout}
             products={products}
             transactions={transactions}
             setActiveTab={setActiveTab}
