@@ -214,8 +214,33 @@ export default function App() {
 
   if (isAuthChecking) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+      <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+        {/* Animated Storefront Icon */}
+        <div className="w-24 h-24 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-600/30 mb-8 animate-[pulse_2s_ease-in-out_infinite] transform transition-transform">
+          <Store className="w-12 h-12 text-white" />
+        </div>
+        
+        {/* Loading Bar */}
+        <div className="w-48 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-4 relative">
+          <div className="absolute top-0 left-0 h-full bg-emerald-500 rounded-full animate-[loadingBar_1.5s_ease-in-out_infinite]" style={{ width: '60%' }} />
+        </div>
+
+        {/* Welcome Text */}
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight animate-[fadeIn_0.5s_ease-in]">
+          Welcome back!
+        </h2>
+        <p className="text-xs text-slate-400 font-medium mt-2 animate-[fadeIn_0.7s_ease-in]">
+          Loading your workspace...
+        </p>
+
+        {/* Loading Bar CSS Keyframes */}
+        <style>{`
+          @keyframes loadingBar {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(50%); }
+            100% { transform: translateX(200%); }
+          }
+        `}</style>
       </div>
     );
   }
