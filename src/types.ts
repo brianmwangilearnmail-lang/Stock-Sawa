@@ -12,6 +12,7 @@ export interface Product {
   costPrice: number;
   imageUrl: string | null;
   createdAt: string;
+  syncStatus?: 'synced' | 'pending_sync';
 }
 
 export type ReasonCategory = 'Sale_Cash' | 'Sale_Mpesa' | 'Expired' | 'Damaged' | 'Deni' | 'Other';
@@ -33,6 +34,7 @@ export interface Customer {
   phone: string;
   debtBalance: number; // Current accumulated debt in KES
   createdAt: string;
+  syncStatus?: 'synced' | 'pending_sync';
 }
 
 export interface DeniTransaction {

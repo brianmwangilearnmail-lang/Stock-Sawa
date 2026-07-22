@@ -278,13 +278,15 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function saveProduct(product: Product): Promise<void> {
+  const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
+  const productToSave: Product = { ...product, syncStatus: isOnline ? 'synced' : 'pending_sync' };
   const db = await initDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('products', 'readwrite');
     const store = tx.objectStore('products');
-    const request = store.put(product);
+    const request = store.put(productToSave);
     request.onsuccess = () => {
-      syncPushProduct(product);
+      if (isOnline) syncPushProduct(productToSave);
       resolve();
     };
     request.onerror = () => reject(request.error);
@@ -324,13 +326,15 @@ export async function getTransactions(): Promise<InventoryTransaction[]> {
 }
 
 export async function saveTransaction(transaction: InventoryTransaction): Promise<void> {
+  const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
+  const txToSave: InventoryTransaction = { ...transaction, syncStatus: isOnline ? 'synced' : 'pending_sync' };
   const db = await initDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('transactions', 'readwrite');
     const store = tx.objectStore('transactions');
-    const request = store.put(transaction);
+    const request = store.put(txToSave);
     request.onsuccess = () => {
-      syncPushTransaction(transaction);
+      if (isOnline) syncPushTransaction(txToSave);
       resolve();
     };
     request.onerror = () => reject(request.error);
@@ -350,13 +354,15 @@ export async function getCustomers(): Promise<Customer[]> {
 }
 
 export async function saveCustomer(customer: Customer): Promise<void> {
+  const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
+  const customerToSave: Customer = { ...customer, syncStatus: isOnline ? 'synced' : 'pending_sync' };
   const db = await initDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('customers', 'readwrite');
     const store = tx.objectStore('customers');
-    const request = store.put(customer);
+    const request = store.put(customerToSave);
     request.onsuccess = () => {
-      syncPushCustomer(customer);
+      if (isOnline) syncPushCustomer(customerToSave);
       resolve();
     };
     request.onerror = () => reject(request.error);
@@ -381,13 +387,15 @@ export async function getDeniTransactions(): Promise<DeniTransaction[]> {
 }
 
 export async function saveDeniTransaction(transaction: DeniTransaction): Promise<void> {
+  const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
+  const deniToSave: DeniTransaction = { ...transaction, syncStatus: isOnline ? 'synced' : 'pending_sync' };
   const db = await initDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction('deni_transactions', 'readwrite');
     const store = tx.objectStore('deni_transactions');
-    const request = store.put(transaction);
+    const request = store.put(deniToSave);
     request.onsuccess = () => {
-      syncPushDeniTransaction(transaction);
+      if (isOnline) syncPushDeniTransaction(deniToSave);
       resolve();
     };
     request.onerror = () => reject(request.error);

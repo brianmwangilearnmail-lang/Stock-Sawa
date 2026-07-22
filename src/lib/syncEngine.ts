@@ -179,3 +179,67 @@ export async function syncPullAll(db: IDBDatabase) {
     console.error('Failed to pull from Supabase', err);
   }
 }
+
+// Drain the offline queue — push all locally-saved items that are marked pending_sync.
+// Called automatically when the device comes back online.
+export async function syncPushAllPending(): Promise<number> {
+  const db = await initDb();
+  let count = 0;
+
+  const getAll = <T>(storeName: string): Promise<T[]> =>
+    new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, 'readonly');
+      const req = tx.objectStore(storeName).getAll();
+      req.onsuccess = () => resolve(req.result as T[]);
+      req.onerror = () => reject(req.error);
+    });
+
+  const markSynced = (storeName: string, id: string): Promise<void> =>
+    new Promise((resolve) => {
+      const tx = db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        if (getReq.result) {
+          store.put({ ...getReq.result, syncStatus: 'synced' });
+        }
+        resolve();
+      };
+    });
+
+  // Push pending products
+  const products = await getAll<any>('products');
+  for (const p of products.filter(p => p.syncStatus === 'pending_sync')) {
+    await syncPushProduct(p);
+    await markSynced('products', p.id);
+    count++;
+  }
+
+  // Push pending transactions
+  const transactions = await getAll<any>('transactions');
+  for (const t of transactions.filter(t => t.syncStatus === 'pending_sync')) {
+    await syncPushTransaction(t);
+    await markSynced('transactions', t.id);
+    count++;
+  }
+
+  // Push pending customers
+  const customers = await getAll<any>('customers');
+  for (const c of customers.filter(c => c.syncStatus === 'pending_sync')) {
+    await syncPushCustomer(c);
+    await markSynced('customers', c.id);
+    count++;
+  }
+
+  // Push pending deni transactions
+  const deniTxs = await getAll<any>('deni_transactions');
+  for (const d of deniTxs.filter(d => d.syncStatus === 'pending_sync')) {
+    await syncPushDeniTransaction(d);
+    await markSynced('deni_transactions', d.id);
+    count++;
+  }
+
+  console.log(`[OfflineSync] Pushed ${count} pending record(s) to Supabase.`);
+  return count;
+}
+

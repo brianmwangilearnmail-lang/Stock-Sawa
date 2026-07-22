@@ -19,7 +19,7 @@ import ProductFormModal from './components/ProductFormModal';
 import BarcodeScanner from './components/BarcodeScanner';
 import AuthPage from './components/AuthPage';
 import LandingPage from './components/LandingPage';
-import { syncPullAll } from './lib/syncEngine';
+import { syncPullAll, syncPushAllPending } from './lib/syncEngine';
 import { supabase } from './lib/supabase';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -214,15 +214,26 @@ export default function App() {
 
   const triggerBackgroundResync = async () => {
     setIsSyncing(true);
-    setSyncToast('Reconnecting... Syncing with Supabase Cloud...');
+    setSyncToast('Back online! Uploading offline changes...');
 
     try {
+      // Step 1: Push everything that was saved while offline
+      const pendingCount = await syncPushAllPending();
+      
+      if (pendingCount > 0) {
+        setSyncToast(`Uploaded ${pendingCount} offline record(s). Syncing...`);
+      }
+
+      // Step 2: Pull the latest data from Supabase (now includes what we just pushed)
       const db = await initDb();
       await syncPullAll(db);
       await refreshAllData();
+      
       setIsSyncing(false);
-      setSyncToast('Database Synced! All records reconciled.');
-      setTimeout(() => setSyncToast(null), 3000);
+      setSyncToast(pendingCount > 0 
+        ? `✓ ${pendingCount} offline change(s) synced to cloud!` 
+        : '✓ All data up to date.');
+      setTimeout(() => setSyncToast(null), 4000);
     } catch (err) {
       console.error('Sync failed', err);
       setIsSyncing(false);
