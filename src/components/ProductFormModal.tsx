@@ -208,8 +208,8 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
         <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-emerald-600" />
-            <h3 className="text-sm font-bold text-slate-800">
-              {productToEdit ? 'Edit Shop Item' : 'Add New Shop Item'}
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+              {initialSku && !productToEdit ? '📦 Register Scanned Item' : productToEdit ? 'Edit Shop Item' : 'Add New Shop Item'}
             </h3>
           </div>
           <button 
@@ -227,7 +227,21 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1">
-            
+
+            {/* Scanned Barcode Banner - shown when opened from scanner */}
+            {initialSku && !productToEdit && (
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3 flex items-start gap-3">
+                <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center shrink-0">
+                  <Barcode className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">New Barcode Scanned! 📦</p>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">Barcode <span className="font-mono font-bold">{initialSku}</span> is not in your stock yet.</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">Enter the product name and price below — the barcode is already saved for you.</p>
+                </div>
+              </div>
+            )}
+
             {/* Photo upload / onboarding (Requirement 1.2) */}
             <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
