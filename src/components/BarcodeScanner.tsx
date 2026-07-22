@@ -20,32 +20,24 @@ export default function BarcodeScanner({ onScan, onClose, products }: BarcodeSca
     
     const startScanner = async () => {
       try {
-        const hasCamera = await Html5Qrcode.getCameras();
-        if (hasCamera && hasCamera.length > 0) {
-          html5QrCodeRef.current = new Html5Qrcode(scannerId);
-          
-          await html5QrCodeRef.current.start(
-            { facingMode: "environment" },
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 150 },
-              aspectRatio: 1.0,
-            },
-            (decodedText) => {
-              // Successfully decoded
-              // Stop scanning immediately to prevent duplicate scans
-              if (html5QrCodeRef.current?.isScanning) {
-                html5QrCodeRef.current.pause();
-                onScan(decodedText);
-              }
-            },
-            (errorMessage) => {
-              // Ignore normal scanning errors (e.g. no barcode found yet)
+        html5QrCodeRef.current = new Html5Qrcode(scannerId);
+        await html5QrCodeRef.current.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.0,
+          },
+          (decodedText) => {
+            if (html5QrCodeRef.current?.isScanning) {
+              html5QrCodeRef.current.pause();
+              onScan(decodedText);
             }
-          );
-        } else {
-          setError("No cameras found on this device.");
-        }
+          },
+          (errorMessage) => {
+            // Ignore frame errors
+          }
+        );
       } catch (err: any) {
         console.error("Scanner initialization error:", err);
         setError("Camera permission denied or camera not accessible.");
@@ -70,9 +62,7 @@ export default function BarcodeScanner({ onScan, onClose, products }: BarcodeSca
     };
   }, [onScan]);
 
-  const handleSimulateScan = (sku: string) => {
-    onScan(sku);
-  };
+  // No manual simulation handling needed anymore
 
   return (
     <div id="barcode-scanner-overlay" className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center p-4">
@@ -138,36 +128,7 @@ export default function BarcodeScanner({ onScan, onClose, products }: BarcodeSca
         )}
       </div>
 
-      {/* Quick Test Barcode Drawer */}
-      <div className="w-full max-w-md mt-6 bg-gray-900/90 rounded-xl p-4 border border-white/5 shadow-lg flex flex-col gap-2">
-        <div className="flex items-center gap-1 text-gray-300 text-xs font-semibold uppercase tracking-wider mb-2">
-          <HelpCircle className="h-4 w-4 text-emerald-400" />
-          <span>Manual Override / Simulation:</span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-          {products.map(p => (
-            <button
-              key={p.id}
-              onClick={() => handleSimulateScan(p.sku)}
-              id={`simulate-scan-${p.id}`}
-              className="flex flex-col items-start p-2 rounded bg-gray-800/60 hover:bg-emerald-950/40 hover:border-emerald-500/40 border border-transparent transition text-left group"
-            >
-              <span className="text-white text-xs font-medium truncate w-full group-hover:text-emerald-300">
-                {p.name}
-              </span>
-              <span className="text-[10px] font-mono text-gray-400 flex items-center gap-1">
-                <Barcode className="h-2.5 w-2.5 text-emerald-500" />
-                {p.sku}
-              </span>
-            </button>
-          ))}
-          {products.length === 0 && (
-            <div className="col-span-2 text-center text-gray-500 text-xs py-3">
-              No products available. Scan a new barcode to register!
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Simulation drawer completely removed to enforce real scanning */}
     </div>
   );
 }
