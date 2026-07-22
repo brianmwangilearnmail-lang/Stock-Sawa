@@ -250,7 +250,7 @@ export default function App() {
 
   if (isAuthChecking) {
     return (
-      <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-center p-4">
         {/* Animated Storefront Icon */}
         <div className="w-24 h-24 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-600/30 mb-8 animate-[pulse_2s_ease-in-out_infinite] transform transition-transform">
           <Store className="w-12 h-12 text-white" />
@@ -289,7 +289,7 @@ export default function App() {
   }
 
   return (
-    <div id="app-root-container" className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col text-slate-800 dark:text-slate-200 antialiased selection:bg-emerald-500/10 selection:text-emerald-900 transition-colors duration-300">
+    <div id="app-root-container" className="min-h-screen bg-slate-50 dark:bg-black flex flex-col text-slate-800 dark:text-slate-200 antialiased selection:bg-emerald-500/10 selection:text-emerald-900 transition-colors duration-300">
       
       {/* Top Navigation Bar / Header */}
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm px-4 py-3 sm:px-6 sm:py-4 transition-colors">

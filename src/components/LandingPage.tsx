@@ -7,7 +7,7 @@ interface LandingPageProps {
 
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-emerald-500/20">
+    <div className="min-h-screen bg-white dark:bg-black font-sans text-slate-900 dark:text-slate-100 selection:bg-emerald-500/20">
       {/* Navigation */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2 sm:gap-3">
