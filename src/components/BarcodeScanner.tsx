@@ -86,22 +86,25 @@ export default function BarcodeScanner({ onScan, onClose, products }: BarcodeSca
       <div className="relative w-full max-w-md bg-black rounded-2xl overflow-hidden border border-white/10 flex flex-col items-center shadow-2xl">
         
         {/* The target div for Html5Qrcode */}
-        <div id="reader" className="w-full aspect-square overflow-hidden bg-black flex items-center justify-center">
-           {isInitializing && !error && (
-             <div className="flex flex-col items-center gap-3 text-emerald-500">
-               <Loader2 className="w-8 h-8 animate-spin" />
-               <span className="text-sm font-medium">Starting Camera...</span>
-             </div>
-           )}
-           {error && (
-             <div className="p-6 text-center text-rose-400 max-w-xs flex flex-col items-center gap-3">
-               <div className="h-12 w-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400 mb-2">
-                 <Camera className="h-6 w-6" />
-               </div>
-               <p className="text-sm font-medium">{error}</p>
-             </div>
-           )}
-        </div>
+        <div id="reader" className="w-full aspect-square overflow-hidden bg-black flex items-center justify-center"></div>
+
+        {/* Loading Overlay */}
+        {isInitializing && !error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-emerald-500 bg-black z-10">
+            <Loader2 className="w-8 h-8 animate-spin" />
+            <span className="text-sm font-medium">Starting Camera...</span>
+          </div>
+        )}
+
+        {/* Error Overlay */}
+        {error && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-rose-400 bg-black z-10">
+            <div className="h-12 w-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-400 mb-2">
+              <Camera className="h-6 w-6" />
+            </div>
+            <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
 
         {/* Scan Guide Frame (Overlay) */}
         {!isInitializing && !error && (
