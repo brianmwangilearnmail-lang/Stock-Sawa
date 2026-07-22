@@ -6,7 +6,7 @@
 import React, { useEffect, useState, Suspense, lazy } from 'react';
 import { 
   Boxes, Store, CreditCard, History, Search, Barcode, Plus, 
-  Wifi, WifiOff, RefreshCw, AlertTriangle, HelpCircle, RotateCcw, ShieldCheck, CheckCircle, Check,
+  Wifi, WifiOff, Cloud, RefreshCw, AlertTriangle, HelpCircle, RotateCcw, ShieldCheck, CheckCircle, Check,
   Shield, User, Lock, MinusCircle, LayoutDashboard, Loader2
 } from 'lucide-react';
 import { Product, Customer, InventoryTransaction, DeniTransaction } from './types';
@@ -42,7 +42,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inventory' | 'credit' | 'profile' | 'activity'>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [productStatusFilter, setProductStatusFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
-  const [isOffline, setIsOffline] = useState<boolean>(false);
+  const [isOffline, setIsOffline] = useState<boolean>(typeof navigator !== 'undefined' ? !navigator.onLine : false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [syncToast, setSyncToast] = useState<string | null>(null);
   const [appToast, setAppToast] = useState<string | null>(null);
@@ -83,8 +83,14 @@ export default function App() {
   useEffect(() => {
     if (!session) return;
     async function loadData() {
-      await initDb();
-      // No seed data - new accounts start fresh
+      const db = await initDb();
+      
+      // Auto-sync from cloud if online (handles fresh installs recovering data)
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        setIsSyncing(true);
+        await syncPullAll(db);
+        setIsSyncing(false);
+      }
       
       const settings = await getSettings();
       if (settings) {
@@ -135,17 +141,25 @@ export default function App() {
     }
   };
 
-  // Handle Offline-to-Online Syncing (Module 4 background re-sync simulation)
-  const toggleOfflineStatus = () => {
-    if (isOffline) {
-      // Transitioning to ONLINE
+  // Listen to native browser online/offline events for auto-sync
+  useEffect(() => {
+    const handleOnline = () => {
       setIsOffline(false);
       triggerBackgroundResync();
-    } else {
-      // Transitioning to OFFLINE
+    };
+    
+    const handleOffline = () => {
       setIsOffline(true);
-    }
-  };
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const triggerBackgroundResync = async () => {
     setIsSyncing(true);
@@ -281,19 +295,23 @@ export default function App() {
               <Barcode className="h-5 w-5" />
             </button>
 
-            <button
-              onClick={toggleOfflineStatus}
-              id="offline-resilience-toggle"
-              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold transition-all shadow-sm border cursor-pointer ${
-                isOffline 
-                  ? 'bg-rose-50 border-rose-150 text-rose-700 hover:bg-rose-100' 
-                  : 'bg-emerald-50 border-emerald-100 text-emerald-700 hover:bg-emerald-100'
-              }`}
-            >
-              <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-pulse ${isOffline ? 'bg-rose-500' : 'bg-emerald-500'}`} />
-              <span className="hidden sm:inline">{isOffline ? 'OFFLINE ACTIVE' : 'ONLINE SYNCED'}</span>
-              <span className="inline sm:hidden">{isOffline ? 'OFFLINE' : 'ONLINE'}</span>
-            </button>
+            <div className={`px-3 py-1 rounded-full border text-xs font-bold flex items-center gap-2 ${
+              isOffline 
+                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/50' 
+                : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/50'
+            }`}>
+              {isOffline ? (
+                <>
+                  <WifiOff className="h-3.5 w-3.5" />
+                  <span>Offline Mode Active</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="h-3.5 w-3.5" />
+                  <span>Cloud Sync Active</span>
+                </>
+              )}
+            </div>
 
             {isSyncing && (
               <RefreshCw className="h-4 w-4 text-emerald-600 animate-spin shrink-0" />
