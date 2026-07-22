@@ -55,6 +55,7 @@ export default function App() {
   const [showProductModal, setShowProductModal] = useState<boolean>(false);
   const [productToEdit, setProductToEdit] = useState<Product | null>(null);
   const [showScanner, setShowScanner] = useState<boolean>(false);
+  const [scannedNewSku, setScannedNewSku] = useState<string | null>(null);
 
   // Initialize DB on mount
   useEffect(() => {
@@ -174,6 +175,10 @@ export default function App() {
     if (found) {
       // Trigger deduction sheets instantly to satisfy < 4 seconds checkout checkout rule!
       setSelectedProduct(found);
+    } else {
+      // Product not found, prompt for creation with pre-filled SKU
+      setScannedNewSku(scannedSku);
+      setShowProductModal(true);
     }
   };
 
@@ -717,9 +722,11 @@ export default function App() {
       {(showProductModal || productToEdit) && (
         <ProductFormModal
           productToEdit={productToEdit || undefined}
+          initialSku={scannedNewSku || undefined}
           onClose={() => {
             setShowProductModal(false);
             setProductToEdit(null);
+            setScannedNewSku(null);
           }}
           showToast={(msg) => {
             setAppToast(msg);
@@ -728,6 +735,7 @@ export default function App() {
           onSuccess={async (updatedProduct) => {
             setShowProductModal(false);
             setProductToEdit(null);
+            setScannedNewSku(null);
             await refreshAllData();
           }}
           onDelete={async (id) => {

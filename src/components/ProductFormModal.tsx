@@ -14,12 +14,13 @@ interface ProductFormModalProps {
   onSuccess: (updatedProduct: Product) => void;
   onDelete?: (id: string) => void;
   productToEdit?: Product;
+  initialSku?: string;
   showToast?: (msg: string) => void;
 }
 
-export default function ProductFormModal({ onClose, onSuccess, onDelete, productToEdit, showToast }: ProductFormModalProps) {
+export default function ProductFormModal({ onClose, onSuccess, onDelete, productToEdit, initialSku, showToast }: ProductFormModalProps) {
   const [name, setName] = useState<string>(productToEdit?.name || '');
-  const [sku, setSku] = useState<string>(productToEdit?.sku || '');
+  const [sku, setSku] = useState<string>(productToEdit?.sku || initialSku || '');
   const [quantity, setQuantity] = useState<number>(productToEdit?.quantity ?? 10);
   const [sellingPrice, setSellingPrice] = useState<number | string>(productToEdit?.sellingPrice ?? '');
   const [costPrice, setCostPrice] = useState<number | string>(productToEdit?.costPrice ?? '');
