@@ -128,3 +128,13 @@ USING (bucket_id = 'product-images' AND auth.role() = 'authenticated');
 CREATE POLICY "Authenticated Deletes" 
 ON storage.objects FOR DELETE 
 USING (bucket_id = 'product-images' AND auth.role() = 'authenticated');
+
+-- ========================================================
+-- REALTIME CONFIGURATION
+-- ========================================================
+-- Add tables to the publication so WebSockets will receive UPDATE/INSERT/DELETE events
+ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.transactions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.customers;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.deni_transactions;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.settings;

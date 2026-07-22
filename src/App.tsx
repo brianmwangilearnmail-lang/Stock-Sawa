@@ -101,7 +101,36 @@ export default function App() {
       await refreshAllData();
     }
     loadData();
+
+    // Set up Supabase Realtime subscription for seamless cross-device syncing
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public' },
+        (payload) => {
+          // Whenever ANY table changes (another device made a transaction), silently pull and refresh
+          silentBackgroundResync();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [session]);
+
+  const silentBackgroundResync = async () => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.onLine) {
+        const db = await initDb();
+        await syncPullAll(db);
+        await refreshAllData();
+      }
+    } catch (err) {
+      console.error('Silent sync failed', err);
+    }
+  };
 
   // Theme observer
   useEffect(() => {
