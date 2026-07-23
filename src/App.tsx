@@ -19,7 +19,7 @@ import ProductFormModal from './components/ProductFormModal';
 import BarcodeScanner from './components/BarcodeScanner';
 import AuthPage from './components/AuthPage';
 import LandingPage from './components/LandingPage';
-import { syncPullAll, syncHardPullAll, syncPushAllPending } from './lib/syncEngine';
+import { syncPullAll, syncHardPullAll, syncPushAllPending, wipeCloudData } from './lib/syncEngine';
 import { supabase } from './lib/supabase';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -267,12 +267,17 @@ export default function App() {
   };
 
   const handleResetDb = async () => {
-    const confirm = window.confirm('This will restore seed products and clear custom audit logs. Proceed?');
+    const confirm = window.confirm('This will restore seed products and wipe all cloud data. Proceed?');
     if (confirm) {
+      if (!isOffline) {
+        await wipeCloudData();
+      }
       await resetDatabase();
       setAdminPin(null);
       setUserRole('employee');
       await refreshAllData();
+      setAppToast('All data has been permanently wiped and reset.');
+      setTimeout(() => setAppToast(null), 3000);
     }
   };
 

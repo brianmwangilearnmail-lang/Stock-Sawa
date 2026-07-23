@@ -24,6 +24,12 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
     setSuccessMsg(null);
 
     try {
+      // CRITICAL SECURITY MEASURE:
+      // Wipe the local database clean BEFORE logging in.
+      // This ensures that if the previous user didn't explicitly log out,
+      // their data won't merge with the new user's incoming data.
+      await resetDatabase();
+
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -39,12 +45,6 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
         setSuccessMsg('Signup successful! You can now log in.');
         setIsLogin(true);
       }
-      
-      // CRITICAL SECURITY MEASURE:
-      // Wipe the local database clean upon a successful login.
-      // This ensures that if the previous user didn't explicitly log out,
-      // their data won't merge with the new user's incoming data.
-      await resetDatabase();
       
       onSuccess();
     } catch (err: any) {

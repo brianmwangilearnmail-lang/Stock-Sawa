@@ -117,9 +117,11 @@ export async function syncPushSettings(settings: AppSettings) {
     const userId = await getCurrentUserId();
     if (!userId) return;
 
+    const cloudSettings = { ...settings, id: `settings_${userId}`, user_id: userId };
+
     const { error } = await supabase
       .from('settings')
-      .upsert({ ...settings, user_id: userId }, { onConflict: 'id' });
+      .upsert(cloudSettings, { onConflict: 'id' });
     if (error) console.error('syncPushSettings error:', error);
   } catch (err) {
     console.error('Failed to sync settings to Supabase', err);
@@ -171,13 +173,17 @@ export async function syncPullAll(db: IDBDatabase) {
     if (settingsRes.error) console.error('Pull settings error:', settingsRes.error);
 
     // Soft merge — only add/update records, NEVER clear local data
-    await Promise.all([
-      mergeIntoStore(db, 'products', productsRes.data ?? []),
-      mergeIntoStore(db, 'transactions', transactionsRes.data ?? []),
-      mergeIntoStore(db, 'customers', customersRes.data ?? []),
-      mergeIntoStore(db, 'deni_transactions', deniRes.data ?? []),
-      mergeIntoStore(db, 'settings', settingsRes.data ?? []),
-    ]);
+    const promises = [];
+    if (!productsRes.error) promises.push(mergeIntoStore(db, 'products', productsRes.data ?? []));
+    if (!transactionsRes.error) promises.push(mergeIntoStore(db, 'transactions', transactionsRes.data ?? []));
+    if (!customersRes.error) promises.push(mergeIntoStore(db, 'customers', customersRes.data ?? []));
+    if (!deniRes.error) promises.push(mergeIntoStore(db, 'deni_transactions', deniRes.data ?? []));
+    if (!settingsRes.error) {
+      const localSettings = (settingsRes.data ?? []).map(s => ({ ...s, id: 'current_settings' }));
+      promises.push(mergeIntoStore(db, 'settings', localSettings));
+    }
+
+    await Promise.all(promises);
   } catch (err) {
     console.error('Failed to pull from Supabase', err);
   }
@@ -213,16 +219,40 @@ export async function syncHardPullAll(db: IDBDatabase) {
 
     if (productsRes.error) console.error('Hard pull products error:', productsRes.error);
     if (transactionsRes.error) console.error('Hard pull transactions error:', transactionsRes.error);
+    if (customersRes.error) console.error('Hard pull customers error:', customersRes.error);
+    if (deniRes.error) console.error('Hard pull deni error:', deniRes.error);
+    if (settingsRes.error) console.error('Hard pull settings error:', settingsRes.error);
 
-    await Promise.all([
-      clearAndWriteStore(db, 'products', productsRes.data ?? []),
-      clearAndWriteStore(db, 'transactions', transactionsRes.data ?? []),
-      clearAndWriteStore(db, 'customers', customersRes.data ?? []),
-      clearAndWriteStore(db, 'deni_transactions', deniRes.data ?? []),
-      clearAndWriteStore(db, 'settings', settingsRes.data ?? []),
-    ]);
+    const promises = [];
+    if (!productsRes.error) promises.push(clearAndWriteStore(db, 'products', productsRes.data ?? []));
+    if (!transactionsRes.error) promises.push(clearAndWriteStore(db, 'transactions', transactionsRes.data ?? []));
+    if (!customersRes.error) promises.push(clearAndWriteStore(db, 'customers', customersRes.data ?? []));
+    if (!deniRes.error) promises.push(clearAndWriteStore(db, 'deni_transactions', deniRes.data ?? []));
+    if (!settingsRes.error) {
+      const localSettings = (settingsRes.data ?? []).map(s => ({ ...s, id: 'current_settings' }));
+      promises.push(clearAndWriteStore(db, 'settings', localSettings));
+    }
+
+    await Promise.all(promises);
   } catch (err) {
     console.error('Failed to hard pull from Supabase', err);
+  }
+}
+
+export async function wipeCloudData() {
+  try {
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    
+    await Promise.all([
+      supabase.from('products').delete().eq('user_id', userId),
+      supabase.from('transactions').delete().eq('user_id', userId),
+      supabase.from('customers').delete().eq('user_id', userId),
+      supabase.from('deni_transactions').delete().eq('user_id', userId),
+      supabase.from('settings').delete().eq('user_id', userId)
+    ]);
+  } catch (err) {
+    console.error('Failed to wipe cloud data', err);
   }
 }
 

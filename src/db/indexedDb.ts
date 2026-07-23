@@ -7,7 +7,7 @@ import { Product, InventoryTransaction, Customer, DeniTransaction, AppSettings }
 import { syncPushProduct, syncPushTransaction, syncPushCustomer, syncPushDeniTransaction, syncPushSettings, syncDeleteProduct } from '../lib/syncEngine';
 
 const DB_NAME = 'stocksawa_db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 export function initDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
