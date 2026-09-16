@@ -10,10 +10,18 @@ export default defineConfig(() => {
       react(), 
       tailwindcss(),
       VitePWA({
-        registerType: 'autoUpdate',
-        selfDestroying: true, // Forces unregistration of any old service workers on production deployments
+        registerType: 'prompt',
+        // Service worker disabled — it was caching stale JS bundles and
+        // intercepting Supabase auth requests, causing "Failed to fetch".
+        // The app is a PWA via the manifest but does NOT register a SW.
+        injectRegister: null,
         devOptions: {
-          enabled: false, // Disable service worker in dev to prevent cache issues
+          enabled: false,
+        },
+        workbox: {
+          // Empty strategy — generates sw.js but it does nothing
+          globPatterns: [],
+          runtimeCaching: [],
         },
         manifest: {
           name: 'StockSawa',
