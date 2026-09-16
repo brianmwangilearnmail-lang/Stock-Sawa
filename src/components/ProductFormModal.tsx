@@ -205,9 +205,9 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
           </div>
         )}
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 shrink-0">
+        <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-emerald-600" />
+            <Sparkles className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
               {initialSku && !productToEdit ? '📦 Register Scanned Item' : productToEdit ? 'Edit Shop Item' : 'Add New Shop Item'}
             </h3>
@@ -218,7 +218,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
               onClose();
             }}
             id="close-product-modal-btn"
-            className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-650 transition-colors cursor-pointer"
+            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
@@ -244,12 +244,12 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
 
             {/* Photo upload / onboarding (Requirement 1.2) */}
             <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
               Product Image (Onboarding Camera)
             </label>
             
             {useCamera ? (
-              <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-slate-250">
+              <div className="relative aspect-video bg-black rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
                 <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
                 <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 px-4">
                   <button
@@ -271,7 +271,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
               </div>
             ) : (
               <div className="flex gap-3">
-                <div className="h-20 w-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center overflow-hidden relative group">
+                <div className="h-20 w-20 rounded-xl bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center overflow-hidden relative group">
                   {imageUrl ? (
                     <img 
                       src={imageUrl} 
@@ -280,11 +280,11 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <ImageIcon className="h-6 w-6 text-slate-400" />
+                    <ImageIcon className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                   )}
                   {isCompressing && (
-                    <div className="absolute inset-0 bg-white/85 flex items-center justify-center">
-                      <span className="text-[9px] font-bold text-emerald-700 animate-pulse">Compressing...</span>
+                    <div className="absolute inset-0 bg-white/85 dark:bg-slate-900/85 flex items-center justify-center">
+                      <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 animate-pulse">Compressing...</span>
                     </div>
                   )}
                 </div>
@@ -294,7 +294,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
                     <button
                       type="button"
                       onClick={startCameraSnap}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-855 rounded-lg text-xs font-bold border border-emerald-200/50 transition cursor-pointer"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/80 dark:text-emerald-300 dark:border-emerald-800/60 rounded-lg text-xs font-bold border border-emerald-200/60 transition cursor-pointer"
                     >
                       <Camera className="h-3.5 w-3.5" />
                       <span>Take Photo</span>
@@ -302,13 +302,13 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-705 rounded-lg text-xs font-bold border border-slate-200 transition cursor-pointer"
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 transition cursor-pointer"
                     >
                       <Upload className="h-3.5 w-3.5" />
                       <span>Upload</span>
                     </button>
                   </div>
-                  <span className="text-[10px] text-slate-400 leading-normal">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 leading-normal">
                     Supports high-resolution camera snaps compressed lightweight client-side.
                   </span>
                   <input
@@ -325,7 +325,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
 
           {/* Product Name */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
               Product Name *
             </label>
             <input
@@ -334,7 +334,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
               value={name}
               onChange={(e) => setName(e.target.value)}
               id="new-product-name-input"
-              className="w-full bg-white border border-slate-250 rounded-xl px-3.5 py-2.5 text-xs font-semibold focus:ring-1 focus:ring-emerald-600 focus:outline-none placeholder-slate-400"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
               placeholder="e.g. Broadways Bread 400g"
             />
           </div>
@@ -342,14 +342,14 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
           {/* SKU / Barcode & Generate */}
           <div className="space-y-1">
             <div className="flex justify-between items-center">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 SKU / Barcode Number *
               </label>
               <button
                 type="button"
                 onClick={generateRandomSKU}
                 id="generate-sku-btn"
-                className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 hover:text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100 shadow-sm cursor-pointer"
+                className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-1 rounded-md border border-emerald-100 dark:border-emerald-800/60 shadow-sm cursor-pointer transition-colors"
               >
                 <Barcode className="h-3.5 w-3.5" />
                 <span>Auto-Gen Code</span>
@@ -361,7 +361,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
               value={sku}
               onChange={(e) => setSku(e.target.value.replace(/\D/g, ''))}
               id="new-product-sku-input"
-              className="w-full bg-white border border-slate-250 rounded-xl px-3.5 py-2.5 text-xs font-mono font-semibold focus:ring-1 focus:ring-emerald-600 focus:outline-none placeholder-slate-400"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
               placeholder="e.g. 6111001009115"
             />
           </div>
@@ -369,7 +369,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
           {/* Pricing Row: Selling vs Cost */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 Selling Price (KES) *
               </label>
               <input
@@ -378,14 +378,14 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
                 value={sellingPrice}
                 onChange={(e) => setSellingPrice(e.target.value)}
                 id="new-product-price-input"
-                className="w-full bg-white border border-slate-250 rounded-xl px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-emerald-600 focus:outline-none font-mono font-bold"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none font-mono font-bold placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
                 placeholder="e.g. 150"
                 min="1"
               />
             </div>
             
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                 Cost Price (KES) *
               </label>
               <input
@@ -394,7 +394,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
                 value={costPrice}
                 onChange={(e) => setCostPrice(e.target.value)}
                 id="new-product-cost-input"
-                className="w-full bg-white border border-slate-250 rounded-xl px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-emerald-600 focus:outline-none font-mono font-bold"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none font-mono font-bold placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
                 placeholder="e.g. 120"
                 min="0"
               />
@@ -403,7 +403,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
 
           {/* Initial quantity in shelf */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
               {productToEdit ? 'Quantity On Shelves' : 'Initial Quantity On Shelves'}
             </label>
             <input
@@ -412,7 +412,7 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
               value={quantity}
               onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
               id="new-product-qty-input"
-              className="w-full bg-white border border-slate-250 rounded-xl px-3.5 py-2.5 text-xs focus:ring-1 focus:ring-emerald-600 focus:outline-none font-mono font-bold"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 focus:outline-none font-mono font-bold placeholder-slate-400 dark:placeholder-slate-500 transition-colors"
               placeholder="e.g. 10"
               min="0"
             />
@@ -420,9 +420,9 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
 
           {/* Profit margins helper overlay */}
           {sellingPrice && costPrice && Number(sellingPrice) > Number(costPrice) && (
-            <div className="bg-emerald-50 border border-emerald-100 text-emerald-950 p-3 rounded-xl text-xs flex justify-between items-center font-medium shrink-0">
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/70 text-emerald-950 dark:text-emerald-200 p-3 rounded-xl text-xs flex justify-between items-center font-medium shrink-0">
               <span>Estimated Kiosk Markup Profit:</span>
-              <strong className="text-emerald-700 font-mono font-bold">
+              <strong className="text-emerald-700 dark:text-emerald-400 font-mono font-bold">
                 KES {Number(sellingPrice) - Number(costPrice)} ({Math.round(((Number(sellingPrice) - Number(costPrice)) / Number(costPrice)) * 100)}%)
               </strong>
             </div>
@@ -430,12 +430,12 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
           </div>
 
           {/* Buttons */}
-          <div className="p-4 sm:p-5 border-t border-slate-200 bg-slate-50 shrink-0 flex gap-2 font-bold">
+          <div className="p-4 sm:p-5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/90 shrink-0 flex gap-2 font-bold">
             {productToEdit && onDelete && (
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="p-3 rounded-xl border border-rose-200 bg-white text-rose-500 hover:bg-rose-50 hover:border-rose-300 transition-all cursor-pointer active:scale-95"
+                className="p-3 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-white dark:bg-slate-800 text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:border-rose-300 dark:hover:border-rose-800 transition-all cursor-pointer active:scale-95"
                 title="Delete product"
               >
                 <Trash2 className="h-4 w-4" />
@@ -444,14 +444,14 @@ export default function ProductFormModal({ onClose, onSuccess, onDelete, product
             <button
               type="button"
               onClick={onClose}
-              className="w-1/3 py-3 rounded-xl border border-slate-200 text-slate-600 bg-white text-xs text-center hover:bg-slate-50 cursor-pointer active:scale-95 transition-all"
+              className="w-1/3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 text-xs text-center hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer active:scale-95 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               id="submit-new-product-btn"
-              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+              className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs uppercase tracking-wider rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 font-bold"
             >
               <Save className="h-4 w-4" />
               <span>{productToEdit ? 'Update Product' : 'Save Product'}</span>
