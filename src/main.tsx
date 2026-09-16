@@ -8,8 +8,8 @@ if (/Android/i.test(navigator.userAgent)) {
   document.documentElement.classList.add('is-android');
 }
 
-// In development, automatically unregister any stale service workers to prevent network caching issues
-if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+// Automatically unregister any stale service workers and clear caches to force latest network build
+if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const registration of registrations) {
       registration.unregister();

@@ -11,6 +11,7 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        selfDestroying: true, // Forces unregistration of any old service workers on production deployments
         devOptions: {
           enabled: false, // Disable service worker in dev to prevent cache issues
         },
