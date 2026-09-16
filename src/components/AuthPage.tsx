@@ -25,15 +25,15 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
 
     try {
       if (isLogin) {
-        // Wipe local data before loading a new user's data
-        await resetDatabase();
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         if (data.session) {
+          // Wipe local data before loading the authenticated user's data
+          await resetDatabase();
           onSuccess();
         }
       } else {
-        // Signup — do NOT wipe DB or call onSuccess yet (email confirmation required)
+        // Signup
         const { data, error } = await supabase.auth.signUp({ 
           email, 
           password,
@@ -43,24 +43,37 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
         });
         if (error) throw error;
 
+        // If email is already registered, Supabase returns an empty identities array
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setError('This email is already registered. Please log in with your password.');
+          setIsLogin(true);
+          return;
+        }
+
         // If session is returned immediately, email confirmation is disabled — go straight in
         if (data.session) {
           await resetDatabase();
           onSuccess();
         } else {
           // Email confirmation required
-          setSuccessMsg('Account created! Check your email and click the confirmation link, then come back and log in.');
+          setSuccessMsg('Account created! Please check your email inbox to confirm your account, then log in.');
           setIsLogin(true);
         }
       }
     } catch (err: any) {
-      const msg = err.message || 'Authentication failed';
-      if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network')) {
-        setError('Network error — check your internet connection and try again.');
-      } else if (msg.toLowerCase().includes('invalid login')) {
-        setError('Incorrect email or password. Please try again.');
-      } else if (msg.toLowerCase().includes('email not confirmed')) {
-        setError('Please confirm your email first. Check your inbox for the confirmation link.');
+      console.error('Supabase Auth error:', err);
+      const msg = err?.message || String(err);
+      const lower = msg.toLowerCase();
+
+      if (lower.includes('failed to fetch') || lower.includes('networkerror') || lower.includes('network error')) {
+        setError('Network error: Unable to connect to Supabase. Check your internet connection or disable any ad blockers/Brave Shields that might block requests.');
+      } else if (lower.includes('invalid login credentials') || lower.includes('invalid login')) {
+        setError('Incorrect email or password. Please double check and try again.');
+      } else if (lower.includes('email not confirmed')) {
+        setError('Please confirm your email first. A confirmation link was sent to your inbox.');
+      } else if (lower.includes('already registered') || lower.includes('user already exists')) {
+        setError('An account with this email already exists. Please log in instead.');
+        setIsLogin(true);
       } else {
         setError(msg);
       }

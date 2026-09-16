@@ -136,10 +136,29 @@ CREATE POLICY "Authenticated Updates" ON storage.objects FOR UPDATE USING (bucke
 CREATE POLICY "Authenticated Deletes" ON storage.objects FOR DELETE USING (bucket_id = 'product-images' AND auth.role() = 'authenticated');
 
 -- ========================================================
--- REALTIME CONFIGURATION
+-- REALTIME CONFIGURATION (Idempotent - safe to re-run)
 -- ========================================================
-ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.transactions;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.customers;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.deni_transactions;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.settings;
+DO $$
+BEGIN
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
+  EXCEPTION WHEN duplicate_object THEN
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.transactions;
+  EXCEPTION WHEN duplicate_object THEN
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.customers;
+  EXCEPTION WHEN duplicate_object THEN
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.deni_transactions;
+  EXCEPTION WHEN duplicate_object THEN
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.settings;
+  EXCEPTION WHEN duplicate_object THEN
+  END;
+END $$;
+
