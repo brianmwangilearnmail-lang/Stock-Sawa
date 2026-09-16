@@ -24,17 +24,17 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
     setSuccessMsg(null);
 
     try {
-      // CRITICAL SECURITY MEASURE:
-      // Wipe the local database clean BEFORE logging in.
-      // This ensures that if the previous user didn't explicitly log out,
-      // their data won't merge with the new user's incoming data.
-      await resetDatabase();
-
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        // Wipe local data before loading a new user's data
+        await resetDatabase();
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        if (data.session) {
+          onSuccess();
+        }
       } else {
-        const { error } = await supabase.auth.signUp({ 
+        // Signup — do NOT wipe DB or call onSuccess yet (email confirmation required)
+        const { data, error } = await supabase.auth.signUp({ 
           email, 
           password,
           options: {
@@ -42,17 +42,33 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
           }
         });
         if (error) throw error;
-        setSuccessMsg('Signup successful! You can now log in.');
-        setIsLogin(true);
+
+        // If session is returned immediately, email confirmation is disabled — go straight in
+        if (data.session) {
+          await resetDatabase();
+          onSuccess();
+        } else {
+          // Email confirmation required
+          setSuccessMsg('Account created! Check your email and click the confirmation link, then come back and log in.');
+          setIsLogin(true);
+        }
       }
-      
-      onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      const msg = err.message || 'Authentication failed';
+      if (msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network')) {
+        setError('Network error — check your internet connection and try again.');
+      } else if (msg.toLowerCase().includes('invalid login')) {
+        setError('Incorrect email or password. Please try again.');
+      } else if (msg.toLowerCase().includes('email not confirmed')) {
+        setError('Please confirm your email first. Check your inbox for the confirmation link.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-black flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans selection:bg-emerald-500/20 relative">
