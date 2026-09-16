@@ -11,6 +11,9 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        devOptions: {
+          enabled: false, // Disable service worker in dev to prevent cache issues
+        },
         manifest: {
           name: 'StockSawa',
           short_name: 'StockSawa',
