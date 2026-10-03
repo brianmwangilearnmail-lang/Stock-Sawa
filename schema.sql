@@ -1,4 +1,4 @@
--- StockSawa Supabase Schema (Multi-user Isolated)
+-- Stockify Supabase Schema (Multi-user Isolated)
 -- Matches the app's exact TypeScript types to prevent sync failures.
 -- Copy and paste this into the Supabase SQL Editor to reset the tables.
 

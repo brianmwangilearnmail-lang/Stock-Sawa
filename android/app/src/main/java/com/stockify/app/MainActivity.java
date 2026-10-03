@@ -1,4 +1,4 @@
-package com.stocksawa.app;
+package com.stockify.app;
 
 import com.getcapacitor.BridgeActivity;
 

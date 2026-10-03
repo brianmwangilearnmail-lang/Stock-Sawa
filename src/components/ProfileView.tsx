@@ -289,7 +289,7 @@ export default function ProfileView({
           className="w-full flex items-center justify-center gap-2.5 px-4 py-3 bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-200 dark:border-rose-800/50 text-sm font-bold transition-all cursor-pointer active:scale-95"
         >
           <LogOut className="h-4 w-4" />
-          <span>Log Out of StockSawa</span>
+          <span>Log Out of Stockify</span>
         </button>
       </div>
 

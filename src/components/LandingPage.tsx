@@ -15,7 +15,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <Store className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight leading-none text-slate-900 dark:text-white">StockSawa</h1>
+            <h1 className="text-xl font-bold tracking-tight leading-none text-slate-900 dark:text-white">Stockify</h1>
             <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest mt-0.5">Retail Inventory</p>
           </div>
         </div>
@@ -65,8 +65,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
 
               {/* Android Download CTA */}
               <a 
-                href="/StockSawa.apk"
-                download="StockSawa.apk"
+                href="/Stockify.apk"
+                download="Stockify.apk"
                 className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white px-8 py-4 rounded-full text-base sm:text-lg font-black shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <Download className="w-5 h-5" />
@@ -121,11 +121,11 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
         </div>
 
-        {/* Features / Why StockSawa Section */}
+        {/* Features / Why Stockify Section */}
         <div className="mt-20 sm:mt-32">
           <div className="text-center mb-12 sm:mb-16 space-y-4">
             <h3 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Why StockSawa?
+              Why Stockify?
             </h3>
             <p className="text-lg text-slate-500 max-w-2xl mx-auto">
               Everything you need to run your retail business smoothly, securely, and efficiently.
@@ -163,7 +163,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         {/* Bottom CTA */}
         <div className="mt-20 sm:mt-32 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 sm:p-12 text-center shadow-sm">
           <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-4">Ready to upgrade your shop?</h3>
-          <p className="text-slate-500 mb-8 max-w-lg mx-auto">Join smart retailers using StockSawa to protect their inventory and grow their profits.</p>
+          <p className="text-slate-500 mb-8 max-w-lg mx-auto">Join smart retailers using Stockify to protect their inventory and grow their profits.</p>
           
           {/* Download section */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -176,8 +176,8 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             </button>
 
             <a 
-              href="/StockSawa.apk"
-              download="StockSawa.apk"
+              href="/Stockify.apk"
+              download="Stockify.apk"
               className="w-full sm:w-auto bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 px-8 py-4 rounded-full text-sm font-bold shadow-md transition-all active:scale-95 flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4" />
@@ -194,7 +194,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
             <Store className="w-4 h-4 text-emerald-600" />
-            <span className="font-bold text-slate-700 dark:text-slate-300">StockSawa</span>
+            <span className="font-bold text-slate-700 dark:text-slate-300">Stockify</span>
             <span>&copy; {new Date().getFullYear()}</span>
           </div>
           <p>Built for modern retail.</p>

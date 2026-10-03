@@ -625,7 +625,7 @@ export default function BottomDeductionModal({
             <div className="bg-neutral-950 p-3.5 rounded-xl border border-neutral-850 text-center space-y-2">
               <span className="text-[10px] text-neutral-450 block uppercase font-bold tracking-wider">Authorize Payment</span>
               <p className="text-xs text-white leading-relaxed font-medium">
-                Do you want to pay KES <strong className="text-emerald-400 font-bold">{product.sellingPrice * quantity}</strong> to <strong className="text-emerald-400 font-bold">STOCKSAWA RETAIL</strong>?
+                Do you want to pay KES <strong className="text-emerald-400 font-bold">{product.sellingPrice * quantity}</strong> to <strong className="text-emerald-400 font-bold">STOCKIFY RETAIL</strong>?
               </p>
             </div>
 

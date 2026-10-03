@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.stocksawa.app',
-  appName: 'StockSawa',
+  appId: 'com.stockify.app',
+  appName: 'Stockify',
   webDir: 'dist'
 };
 

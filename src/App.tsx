@@ -350,7 +350,7 @@ export default function App() {
               <Store className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">StockSawa</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-none">Stockify</h1>
               <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-widest mt-1 hidden sm:block">Stock Yako, Sawa Kila Wakati</p>
             </div>
           </div>
@@ -763,7 +763,7 @@ export default function App() {
         <div className="max-w-full mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-500 text-center sm:text-left">
           <div className="flex flex-col sm:flex-row items-center gap-2 font-medium">
             <ShieldCheck className="h-4 w-4 text-emerald-600 animate-pulse shrink-0" />
-            <span>StockSawa Audit Trail. Secured locally via browser IndexedDB Storage.</span>
+            <span>Stockify Audit Trail. Secured locally via browser IndexedDB Storage.</span>
           </div>
         </div>
       </footer>

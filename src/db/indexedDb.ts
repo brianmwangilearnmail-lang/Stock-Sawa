@@ -6,7 +6,7 @@
 import { Product, InventoryTransaction, Customer, DeniTransaction, AppSettings } from '../types';
 import { syncPushProduct, syncPushTransaction, syncPushCustomer, syncPushDeniTransaction, syncPushSettings, syncDeleteProduct } from '../lib/syncEngine';
 
-const DB_NAME = 'stocksawa_db';
+const DB_NAME = 'stockify_db';
 const DB_VERSION = 4;
 
 export function initDb(): Promise<IDBDatabase> {

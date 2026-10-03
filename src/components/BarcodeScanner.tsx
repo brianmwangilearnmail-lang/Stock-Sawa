@@ -129,7 +129,7 @@ export default function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps)
       <div className="flex justify-between items-center px-4 py-3 bg-black/60 backdrop-blur-sm z-20">
         <div className="flex items-center gap-2">
           <Barcode className="h-5 w-5 text-emerald-400" />
-          <span className="font-semibold tracking-tight text-sm text-white">StockSawa Smart Scan</span>
+          <span className="font-semibold tracking-tight text-sm text-white">Stockify Smart Scan</span>
         </div>
         <button
           onClick={handleClose}
