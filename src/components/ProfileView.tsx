@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Shield, ShieldCheck, User, Lock, RotateCcw, KeyRound, AlertCircle, CheckCircle2, Moon, Sun, LogOut } from 'lucide-react';
+import { Shield, ShieldCheck, User, Lock, RotateCcw, KeyRound, AlertCircle, CheckCircle2, Moon, Sun, LogOut, FileText } from 'lucide-react';
 import AuditLogView from './AuditLogView';
 import { InventoryTransaction, Product } from '../types';
 import { supabase } from '../lib/supabase';
+import PrivacyPolicyModal from './PrivacyPolicyModal';
 
 interface ProfileViewProps {
   userRole: 'admin' | 'employee';
@@ -46,6 +47,7 @@ export default function ProfileView({
   // Username update states
   const [newUsername, setNewUsername] = useState(username);
   const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const handleSwitchToAdmin = () => {
     if (!adminPin) {
@@ -292,6 +294,32 @@ export default function ProfileView({
           <span>Log Out of Stockify</span>
         </button>
       </div>
+
+      {/* Legal & Compliance Section */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+        <div className="space-y-1">
+          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider block">Legal & Security</span>
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">Data Protection & Privacy</h2>
+        </div>
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          Your inventory and customer Deni ledger records are protected in compliance with the Kenya Data Protection Act (KDPA, 2019).
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowPrivacy(true)}
+          className="inline-flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 underline underline-offset-4 cursor-pointer"
+        >
+          <ShieldCheck className="w-4 h-4" />
+          <span>View Privacy & Data Policy</span>
+        </button>
+      </div>
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
+        showAgreeButton={false}
+      />
 
       {/* PIN Setup/Entry Modal */}
       {(showPinPrompt || isSettingPin) && (

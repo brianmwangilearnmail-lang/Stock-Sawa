@@ -1,11 +1,13 @@
-import React from 'react';
-import { Store, ShieldCheck, WifiOff, CreditCard, ChevronRight, Barcode, TrendingUp, Sparkles, Smartphone, Download, Globe } from 'lucide-react';
+import React, { useState } from 'react';
+import { Store, ShieldCheck, WifiOff, CreditCard, ChevronRight, Barcode, TrendingUp, Sparkles, Smartphone, Download, Globe, Shield } from 'lucide-react';
+import PrivacyPolicyModal from './PrivacyPolicyModal';
 
 interface LandingPageProps {
   onGetStarted: () => void;
 }
 
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
+  const [showPrivacy, setShowPrivacy] = useState(false);
   return (
     <div className="min-h-screen bg-white dark:bg-black font-sans text-slate-900 dark:text-slate-100 selection:bg-emerald-500/20">
       {/* Navigation */}
@@ -197,9 +199,25 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
             <span className="font-bold text-slate-700 dark:text-slate-300">Stockify</span>
             <span>&copy; {new Date().getFullYear()}</span>
           </div>
-          <p>Built for modern retail.</p>
+          <div className="flex items-center gap-4 text-xs font-semibold">
+            <button
+              onClick={() => setShowPrivacy(true)}
+              className="text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition underline underline-offset-4 cursor-pointer"
+            >
+              Privacy & Data Policy
+            </button>
+            <span className="text-slate-300 dark:text-slate-700">•</span>
+            <p>Built for modern retail in Kenya</p>
+          </div>
         </div>
       </footer>
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal 
+        isOpen={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
+        showAgreeButton={true}
+      />
 
       <style>{`
         @keyframes float {

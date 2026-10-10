@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Store, Key, Mail, Lock, ShieldCheck, Loader2, User, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Store, Key, Mail, Lock, ShieldCheck, Loader2, User, CheckCircle2, AlertTriangle, RefreshCw, FileText } from 'lucide-react';
 import { supabase, supabaseUrl } from '../lib/supabase';
 import { resetDatabase } from '../db/indexedDb';
+import PrivacyPolicyModal from './PrivacyPolicyModal';
 
 interface AuthPageProps {
   onSuccess: () => void;
@@ -19,6 +20,10 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [agreeToPolicy, setAgreeToPolicy] = useState(() => {
+    return localStorage.getItem('stocksawa_privacy_agreed') === 'true';
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +47,13 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
           onSuccess();
         }
       } else {
+        // Signup requires policy agreement
+        if (!agreeToPolicy) {
+          setError('Please read and agree to the Privacy and Data Policy to create an account.');
+          setIsLoading(false);
+          return;
+        }
+
         // Signup
         const { data, error } = await supabase.auth.signUp({ 
           email: cleanEmail, 
@@ -266,6 +278,34 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
             </div>
           </div>
 
+          {!isLogin && (
+            <div className="flex items-start gap-2.5 pt-1 animate-[fadeIn_0.2s_ease-out]">
+              <input
+                id="policy-checkbox"
+                type="checkbox"
+                checked={agreeToPolicy}
+                onChange={(e) => {
+                  setAgreeToPolicy(e.target.checked);
+                  if (e.target.checked) {
+                    localStorage.setItem('stocksawa_privacy_agreed', 'true');
+                  }
+                }}
+                className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+              />
+              <label htmlFor="policy-checkbox" className="text-xs text-slate-600 dark:text-slate-400 select-none">
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacy(true)}
+                  className="text-emerald-600 dark:text-emerald-400 font-bold underline hover:text-emerald-700 cursor-pointer"
+                >
+                  Privacy & Data Protection Policy
+                </button>
+                {' '}under the Kenya Data Protection Act.
+              </label>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={isLoading}
@@ -276,7 +316,7 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
           </button>
         </form>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center space-y-4">
           <button
             type="button"
             onClick={() => {
@@ -285,12 +325,28 @@ export default function AuthPage({ onSuccess, onBack }: AuthPageProps) {
               setSuccessMsg(null);
               setDiagnosticResult(null);
             }}
-            className="text-sm font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors cursor-pointer"
+            className="text-sm font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors cursor-pointer block w-full"
           >
             {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowPrivacy(true)}
+            className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors underline cursor-pointer"
+          >
+            Read Privacy & Data Policy
+          </button>
         </div>
       </div>
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
+        onAgree={() => setAgreeToPolicy(true)}
+        showAgreeButton={true}
+      />
     </div>
   );
 }
